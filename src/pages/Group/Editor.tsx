@@ -159,7 +159,7 @@ export default observer(() => {
           resize: none;
         }
         .textarea-autosize:focus {
-          border-color: #7f9cf5 !important;
+          border-color: #333 !important;
           outline: none;
         }
       `}</style>
