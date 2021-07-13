@@ -231,11 +231,7 @@ export default observer((props: { content: IContentItem }) => {
       {status === Status.FAILED && (
         <Tooltip
           placement="top"
-          title={
-            isCurrentGroupOwner
-              ? '暂无出块节点在线，您发布的内容暂时存储在本地'
-              : '这个群组所有的节点都不在线，群组已失效，无法继续使用了'
-          }
+          title="暂无出块节点在线，您发布的内容暂时存储在本地"
           arrow
         >
           <div className="absolute top-[15px] right-[15px] rounded-full text-red-400 text-12 leading-none font-bold tracking-wide">
