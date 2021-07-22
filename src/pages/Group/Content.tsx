@@ -163,7 +163,7 @@ export default observer((props: { content: IContentItem }) => {
             )}
             dangerouslySetInnerHTML={{
               __html: hasPermission
-                ? urlify(content.Content.content)
+                ? urlify(content.Content.content || ' ')
                 : `<div class="text-red-400">Ta 被禁言了，内容无法显示</div>`,
             }}
           />
