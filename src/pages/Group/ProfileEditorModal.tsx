@@ -5,8 +5,10 @@ import { TextField } from '@material-ui/core';
 import Button from 'components/Button';
 import { sleep } from 'utils';
 import { useStore } from 'store';
-import GroupApi from 'apis/group';
+import GroupApi, { ContentTypeUrl } from 'apis/group';
 import ImageEditor from 'components/ImageEditor';
+import Base64 from 'utils/base64';
+import useAvatar from 'hooks/useAvatar';
 
 interface IProps {
   open: boolean;
@@ -14,13 +16,20 @@ interface IProps {
 }
 
 const ProfileEditor = observer((props: IProps) => {
-  const { snackbarStore, activeGroupStore, groupStore, seedStore, nodeStore } =
+  const { snackbarStore, activeGroupStore, nodeStore, profileStore } =
     useStore();
+  const defaultAvatar = useAvatar(nodeStore.info.node_publickey);
+  const profile = profileStore.profileMap[nodeStore.info.node_publickey];
   const state = useLocalObservable(() => ({
-    name: '',
     loading: false,
     done: false,
-    avatar: 'https://i.xue.cn/b3be63.jpg',
+    name: profile
+      ? profile.Content.name
+      : nodeStore.info.node_publickey.slice(-10, -2),
+    avatar:
+      profile && profile.Content.image
+        ? Base64.getUrl(profile.Content.image)
+        : '',
   }));
 
   const updateProfile = async () => {
@@ -33,33 +42,50 @@ const ProfileEditor = observer((props: IProps) => {
     }
     state.loading = true;
     state.done = false;
-    console.log(` ------------- 更新 profile ---------------`);
-    console.log({ name: state.name, avatar: state.avatar });
-    // try {
-    //   const group = await GroupApi.updateProfile(state.name);
-    //   await sleep(200);
-    //   const { groups } = await GroupApi.fetchMyGroups();
-    //   if (groups) {
-    //     state.loading = false;
-    //     state.done = true;
-    //     await sleep(300);
-    //     seedStore.addSeed(nodeStore.storagePath, group.group_id, group);
-    //     groupStore.addGroups(groups);
-    //     activeGroupStore.setId(group.group_id);
-    //     props.onClose();
-    //     await sleep(200);
-    //     snackbarStore.show({
-    //       message: '创建成功',
-    //     });
-    //   }
-    // } catch (err) {
-    //   console.error(err);
-    //   state.loading = false;
-    //   snackbarStore.show({
-    //     message: '创建失败，貌似哪里出错了',
-    //     type: 'error',
-    //   });
-    // }
+    try {
+      const payload = {
+        type: 'Update',
+        person: {
+          name: state.name,
+          image: {
+            mediaType: Base64.getMimeType(state.avatar),
+            content: Base64.getContent(state.avatar),
+          },
+        },
+        target: {
+          id: activeGroupStore.id,
+          type: 'Group',
+        },
+      };
+      const res = await GroupApi.updateProfile(payload);
+      profileStore.addProfiles([
+        {
+          TrxId: res.trx_id,
+          Publisher: nodeStore.info.node_publickey,
+          Content: {
+            name: payload.person.name,
+            image: payload.person.image,
+          },
+          TypeUrl: ContentTypeUrl.Person,
+          TimeStamp: Date.now() * 1000000,
+        },
+      ]);
+      await sleep(400);
+      state.loading = false;
+      state.done = true;
+      props.onClose();
+      await sleep(200);
+      snackbarStore.show({
+        message: '修改成功',
+      });
+    } catch (err) {
+      console.error(err);
+      state.loading = false;
+      snackbarStore.show({
+        message: '修改失败，貌似哪里出错了',
+        type: 'error',
+      });
+    }
   };
 
   return (
@@ -74,7 +100,7 @@ const ProfileEditor = observer((props: IProps) => {
               placeholderWidth={120}
               editorPlaceholderWidth={200}
               name="头像"
-              imageUrl={state.avatar}
+              imageUrl={state.avatar || defaultAvatar}
               getImageUrl={(url: string) => {
                 state.avatar = url;
               }}

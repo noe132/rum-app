@@ -36,6 +36,8 @@ export const StoreProvider = ({ children }: IProps) => {
   );
 };
 
+export type Store = ReturnType<typeof useCreateStore>;
+
 export const useStore = () => {
   const store = React.useContext(storeContext);
   if (!store) {
@@ -43,5 +45,5 @@ export const useStore = () => {
   }
   (window as any).toJS = toJS;
   (window as any).store = store;
-  return store as ReturnType<typeof useCreateStore>;
+  return store as Store;
 };
