@@ -13,12 +13,12 @@ export default () => {
   const DURATION_6_SECONDS = 6 * 1000;
   const DURATION_10_SECONDS = 10 * 1000;
 
-  usePollingMyNodeInfo(DURATION_4_SECONDS);
-  usePollingNetwork(DURATION_4_SECONDS);
-  usePollingMyGroups(DURATION_3_SECONDS);
-  usePollingAuth(DURATION_10_SECONDS);
+  // usePollingMyNodeInfo(DURATION_4_SECONDS);
+  // usePollingNetwork(DURATION_4_SECONDS);
+  // usePollingMyGroups(DURATION_3_SECONDS);
+  // usePollingAuth(DURATION_10_SECONDS);
   console.log(` ------------- hard code: ---------------`);
   // usePollingGroupUnReadCount(DURATION_6_SECONDS);
   // usePollingPreviousContents(DURATION_5_SECONDS);
-  usePollingContent(DURATION_6_SECONDS);
+  // usePollingContent(DURATION_6_SECONDS);
 };

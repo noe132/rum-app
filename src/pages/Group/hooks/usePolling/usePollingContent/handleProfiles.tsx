@@ -1,16 +1,16 @@
 import { Store } from 'store';
-import { IObjectItem, ContentTypeUrl } from 'apis/group';
+import { IContentItem, IPersonItem, ContentTypeUrl } from 'apis/group';
 
-export default (store: Store, contents: IObjectItem[]) => {
+export default (store: Store, contents: IContentItem[]) => {
   // filter profiles
   const profiles = contents.filter(
     (content) => content.TypeUrl === ContentTypeUrl.Person
-  );
+  ) as IPersonItem[];
 
   if (profiles.length === 0) {
     return;
   }
 
   // update profiles
-  store.profileStore.addProfiles(profiles);
+  // store.profileStore.addProfiles(profiles);
 };

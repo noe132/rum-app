@@ -58,6 +58,8 @@ export interface IPerson {
   };
 }
 
+export type IContentItem = IObjectItem | IPersonItem;
+
 export interface IObjectItem {
   TrxId: string;
   Publisher: string;
