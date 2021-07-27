@@ -13,13 +13,14 @@ import JoinGroupModal from './JoinGroupModal';
 import GroupMenu from './GroupMenu';
 import { useStore } from 'store';
 import { FilterType } from 'store/activeGroup';
+import { DEFAULT_LATEST_STATUS } from 'store/group';
 import { Badge } from '@material-ui/core';
 import { remote } from 'electron';
 import { isProduction } from 'utils/env';
 
 export default observer(() => {
   const { groupStore, activeGroupStore, nodeStore } = useStore();
-  const { safeLatestStatusMap } = groupStore;
+  const { latestStatusMap } = groupStore;
   const state = useLocalObservable(() => ({
     anchorEl: null,
     showMenu: false,
@@ -153,7 +154,8 @@ export default observer(() => {
             >
               <div className="py-1 truncate">{group.GroupName}</div>
               {activeGroupStore.id === group.GroupId &&
-                !safeLatestStatusMap[group.GroupId].unreadCount && (
+                !(latestStatusMap[group.GroupId] || DEFAULT_LATEST_STATUS)
+                  .unreadCount && (
                   <div
                     onClick={(e: any) => {
                       e.stopPropagation();
@@ -174,8 +176,14 @@ export default observer(() => {
                         'bg-black text-white'
                     ),
                   }}
-                  badgeContent={safeLatestStatusMap[group.GroupId].unreadCount}
-                  invisible={!safeLatestStatusMap[group.GroupId].unreadCount}
+                  badgeContent={
+                    (latestStatusMap[group.GroupId] || DEFAULT_LATEST_STATUS)
+                      .unreadCount
+                  }
+                  invisible={
+                    !(latestStatusMap[group.GroupId] || DEFAULT_LATEST_STATUS)
+                      .unreadCount
+                  }
                   variant="standard"
                 ></Badge>
               </div>
