@@ -294,6 +294,7 @@ export default observer((props: any) => {
           props.close && props.close();
         }}
         loading={state.isUploadingOriginImage}
+        showAvatarSelect
         selectMenuItem={(action: string) => {
           if (action === 'upload') {
             avatarInputRef.current!.click();
