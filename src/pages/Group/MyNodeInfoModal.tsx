@@ -110,9 +110,9 @@ const MyNodeInfo = observer(() => {
                   arrow
                   interactive
                 >
-                  <div>
-                    {nodeStore.storagePath.length > 24
-                      ? `../..${nodeStore.storagePath.slice(-24)}`
+                  <div className="tracking-wide">
+                    {nodeStore.storagePath.length > 25
+                      ? `...${nodeStore.storagePath.slice(-25)}`
                       : nodeStore.storagePath}
                   </div>
                 </Tooltip>
