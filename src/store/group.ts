@@ -13,6 +13,7 @@ interface IDraftMap {
 export interface IProfile {
   name: string;
   avatar: string;
+  mixinUUID: string;
 }
 
 export interface ILatestStatus {

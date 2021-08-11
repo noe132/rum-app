@@ -9,6 +9,10 @@ import Button from 'components/Button';
 import MiddleTruncate from 'components/MiddleTruncate';
 import { sleep, isWindow } from 'utils';
 import { useStore } from 'store';
+import { client_id, getVerifierAndChanllege, getOAuthUrl } from 'utils/mixinOAuth';
+
+import { getAccessToken, getUserProfile } from 'apis/mixinOAuth';
+
 import ImageEditor from 'components/ImageEditor';
 import getProfile from 'store/selectors/getProfile';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -22,46 +26,86 @@ interface IProps {
 
 interface BindMixinModalProps {
   open: boolean;
-  onClose: (done?: boolean) => void;
+  onClose: () => void;
+  onBind: (mixinUUID: string) => void;
 }
 
 const MixinOAuth = observer((props: BindMixinModalProps) => {
-  const loginUrl = `https://mixin-www.zeromesh.net/oauth/authorize?client_id=ef7ba9a7-c0ac-46a7-8ce3-717be19caf9c&scope=PROFILE:READ&response_type=code&redirect_url=${window.location.href}`;
-  const { onClose } = props;
+  const { snackbarStore } = useStore();
+  const { onClose, onBind } = props;
   const state = useLocalObservable(() => ({
+    verifier: null as null | string,
+    challenge: null as null | string,
+    oauthUrl: null as null | string,
     webviewLoading: true,
     webview: null as null | HTMLWebViewElement,
   }));
 
 
   const loadStop = React.useCallback(async () => {
-    if ((state.webview as any)?.getURL() === loginUrl) {
+    if ((state.webview as any)?.getURL() === state.oauthUrl) {
       runInAction(() => {
         state.webviewLoading = false
       })
     }
   },[]);
 
+  const handleOauthFailure = () => {
+    onClose();
+    snackbarStore.show({
+      message: '获取mixin信息失败',
+      type: 'error',
+    });
+  }
+
   const redirecting = React.useCallback(async (event: Event) => {
     const currentUrl = (event as Event & {url: string}).url;
-    if (currentUrl !== loginUrl) {
+    if (currentUrl !== state.oauthUrl) {
       runInAction(() => {
         state.webviewLoading = true;
       })
       const regExp = /code=([^&#]*)/g;
       const code = regExp.exec(currentUrl)?.[1];
-      console.log(code);
+      if (code && state.verifier) {
+        try {
+          const res = await getAccessToken({client_id, code, code_verifier: state.verifier});
+          if (res?.data?.access_token) {
+            const res2 = await getUserProfile(res.data.access_token);
+            if (res2?.data?.user_id) {
+              onBind(res2?.data?.user_id);
+              onClose();
+            } else {
+              handleOauthFailure();
+            }
+          } else {
+            handleOauthFailure();
+          }
+        } catch(e) {
+          console.warn(e);
+          handleOauthFailure();
+        }
+      } else {
+        handleOauthFailure();
+      }
     }
   },[]);
 
   React.useEffect(() => {
-     state.webview?.addEventListener('did-stop-loading', loadStop);
-     state.webview?.addEventListener('will-navigate', redirecting);
+      const { verifier, challenge } = getVerifierAndChanllege();
+      const oauthUrl = getOAuthUrl(challenge);
+      state.verifier = verifier;
+      state.challenge = challenge;
+      state.oauthUrl = oauthUrl;
+  }, [state]);
+
+  React.useEffect(() => {
+      state.webview?.addEventListener('did-stop-loading', loadStop);
+      state.webview?.addEventListener('will-navigate', redirecting);
     return () => {
       state.webview?.removeEventListener('did-stop-loading', loadStop);
       state.webview?.removeEventListener('will-navigate', redirecting);
     }
-  }, [state]);
+  }, [state.oauthUrl]);
 
   return (
     <div className="bg-white rounded-12 text-center">
@@ -71,7 +115,7 @@ const MixinOAuth = observer((props: BindMixinModalProps) => {
           Mixin 扫码以完成绑定
         </div>
         <div className="relative overflow-hidden">
-          {loginUrl && (
+          {state.oauthUrl && (
             <div
               className={classNames(
                 {
@@ -81,7 +125,7 @@ const MixinOAuth = observer((props: BindMixinModalProps) => {
               )}
             >
               <webview
-                src={loginUrl}
+                src={state.oauthUrl}
                 ref={(ref) => { state.webview = ref; }}
               />
               <style jsx>{`
@@ -236,7 +280,7 @@ const ProfileEditor = observer((props: IProps) => {
           <div className="flex w-full px-12 mt-6">
             <div className="p-2 pl-3 border border-black border-opacity-20 text-gray-500 text-12 truncate flex-1 rounded-l-4 border-r-0 hover:border-opacity-100">
               <MiddleTruncate
-                string={nodeStore.info.node_publickey}
+                string={state.profile.mixinUUID || ''}
                 length={15}
               />
             </div>
@@ -278,20 +322,12 @@ const ProfileEditor = observer((props: IProps) => {
         </div>
       </div>
       <BindMixinModal
-        //amount={state.mixinConnectionResp.amount}
-        //paymentUrl={state.mixinConnectionResp.paymentUrl}
         open={state.openBindMixinModal}
-        onClose={async (done) => {
+        onBind={(mixinUUID: string) => {
+          state.profile.mixinUUID = mixinUUID;
+        }}
+        onClose={() => {
           state.openBindMixinModal =  false;
-          //if (done) {
-            //await sleep(500);
-            //confirmDialogStore.show({
-              //content: '这个操作正在上链，等待确认中，预计 3-5 分钟后完成',
-              //okText: '我知道了',
-              //ok: () => confirmDialogStore.hide(),
-              //cancelDisabled: true,
-            //});
-          //}
         }}
       />
     </div>
