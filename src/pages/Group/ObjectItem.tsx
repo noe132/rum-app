@@ -1,7 +1,8 @@
 import React from 'react';
 import { observer, useLocalObservable } from 'mobx-react-lite';
-import { ago, sleep, urlify } from 'utils';
+import { ago, BFSReplace, sleep } from 'utils';
 import classNames from 'classnames';
+import escapeStringRegexp from 'escape-string-regexp';
 import { FiChevronDown } from 'react-icons/fi';
 import { HiOutlineBan } from 'react-icons/hi';
 import { RiCheckDoubleFill, RiCheckLine } from 'react-icons/ri';
@@ -40,19 +41,11 @@ export default observer((props: { object: IDbDerivedObjectItem }) => {
       ? activeGroupStore.person
       : activeGroupStore.personMap[object.Publisher]
   );
-  const objectRef = React.useRef<any>();
+  const objectRef = React.useRef<HTMLDivElement>(null);
   const isFilterSomeone = activeGroupStore.filterType == FilterType.SOMEONE;
   const isFilterMe = activeGroupStore.filterType == FilterType.ME;
   const { content } = object.Content;
   const { searchText } = activeGroupStore;
-  const reg = new RegExp(searchText, 'ig');
-  const derivedContent = searchText
-    ? content.replace(
-        reg,
-        (matchedText) =>
-          `<span class="text-yellow-500 font-bold">${matchedText}</span>`
-      )
-    : content;
 
   React.useEffect(() => {
     if (
@@ -77,6 +70,39 @@ export default observer((props: { object: IDbDerivedObjectItem }) => {
       })();
     }
   }, [prevStatus, status]);
+
+  // replace link and search text
+  React.useEffect(() => {
+    const box = objectRef.current;
+    if (!box) {
+      return;
+    }
+
+    BFSReplace(
+      box,
+      /(https?:\/\/[^\s]+)/g,
+      (text: string) => {
+        const link = document.createElement('a');
+        link.href = text;
+        link.className = 'text-blue-400';
+        link.textContent = text;
+        return link;
+      }
+    );
+
+    if (searchText) {
+      BFSReplace(
+        box,
+        new RegExp(escapeStringRegexp(searchText), 'g'),
+        (text: string) => {
+          const span = document.createElement('span');
+          span.textContent = text;
+          span.className = 'text-yellow-500 font-bold';
+          return span;
+        }
+      );
+    }
+  }, [searchText, content]);
 
   const goToUserPage = async (publisher: string) => {
     if (isFilterSomeone || isFilterMe) {
@@ -170,6 +196,7 @@ export default observer((props: { object: IDbDerivedObjectItem }) => {
           </div>
           <div
             ref={objectRef}
+            key={content + searchText}
             className={classNames(
               {
                 expand: state.expand,
@@ -179,7 +206,7 @@ export default observer((props: { object: IDbDerivedObjectItem }) => {
             )}
             dangerouslySetInnerHTML={{
               __html: hasPermission
-                ? urlify(derivedContent || ' ')
+                ? content
                 : `<div class="text-red-400">Ta 被禁言了，内容无法显示</div>`,
             }}
           />
