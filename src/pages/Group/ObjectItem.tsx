@@ -22,6 +22,7 @@ interface IProps {
   object: IDbDerivedObjectItem
   inObjectDetailModal?: boolean
   disabledUserCardTooltip?: boolean
+  withBorder?: boolean
   beforeGoToUserPage?: () => unknown | Promise<unknown>
 }
 
@@ -100,7 +101,10 @@ export default observer((props: IProps) => {
   }, [searchText, content]);
 
   return (
-    <div className="rounded-12 bg-white mb-[10px] px-8 pt-6 pb-3 w-full lg:w-[600px] box-border relative">
+    <div className={classNames({
+      'border border-gray-f2': props.withBorder,
+    }, 'rounded-12 bg-white px-8 pt-6 pb-3 w-full lg:w-[600px] box-border relative mb-[10px]')}
+    >
       <div className="relative">
         <Tooltip
           disableHoverListener={props.disabledUserCardTooltip}
