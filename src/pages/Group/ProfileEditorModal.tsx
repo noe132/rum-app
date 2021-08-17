@@ -14,14 +14,13 @@ import { client_id, getVerifierAndChanllege, getOAuthUrl } from 'utils/mixinOAut
 import { getAccessToken, getUserProfile } from 'apis/mixinOAuth';
 
 import ImageEditor from 'components/ImageEditor';
-import getProfile from 'store/selectors/getProfile';
 import Tooltip from '@material-ui/core/Tooltip';
 import useSubmitPerson from 'hooks/useSubmitPerson';
 import { MdInfo } from 'react-icons/md';
 
 interface IProps {
-  open: boolean;
-  onClose: () => void;
+  open: boolean
+  onClose: () => void
 }
 
 interface BindMixinModalProps {
@@ -195,7 +194,7 @@ const ProfileEditor = observer((props: IProps) => {
     loading: false,
     done: false,
     applyToAllGroups: false,
-    profile: getProfile(nodeStore.info.node_publickey, activeGroupStore.person),
+    profile: activeGroupStore.profile,
   }));
   const submitPerson = useSubmitPerson();
 
@@ -214,13 +213,13 @@ const ProfileEditor = observer((props: IProps) => {
         ? groupStore.groups.map((group) => group.GroupId)
         : [activeGroupStore.id];
       for (const groupId of groupIds) {
-        const person = await submitPerson({
+        const profile = await submitPerson({
           groupId,
           publisher: nodeStore.info.node_publickey,
           profile: state.profile,
         });
         if (activeGroupStore.id === groupId) {
-          activeGroupStore.setPerson(person);
+          activeGroupStore.setProfile(profile);
           groupStore.setProfileAppliedToAllGroups(state.profile);
         }
       }
@@ -246,7 +245,7 @@ const ProfileEditor = observer((props: IProps) => {
     <div className="bg-white rounded-12 text-center py-8 px-12">
       <div className="w-72">
         <div className="text-18 font-bold text-gray-700">编辑资料</div>
-        <div className="mt-6">
+        <div className="mt-5">
           <div className="flex justify-center">
             <ImageEditor
               roundedFull
@@ -267,10 +266,10 @@ const ProfileEditor = observer((props: IProps) => {
             onChange={(e) => {
               state.profile.name = e.target.value.trim();
             }}
-            onKeyDown={(e: any) => {
-              if (e.keyCode === 13) {
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
-                e.target.blur();
+                (e.target as HTMLInputElement).blur();
                 updateProfile();
               }
             }}
@@ -303,19 +302,20 @@ const ProfileEditor = observer((props: IProps) => {
             arrow
           >
             <div
-              className="flex items-center justify-center mt-5"
+              className="flex items-center justify-center mt-5 -ml-2"
               onClick={() => {
                 state.applyToAllGroups = !state.applyToAllGroups;
               }}
             >
               <Checkbox checked={state.applyToAllGroups} color="primary" />
-              <span className="text-gray-88 mt-1-px text-13 cursor-pointer">
+              <span className="text-gray-88 text-13 cursor-pointer">
                 应用到所有群组
               </span>
             </div>
           </Tooltip>
         </div>
-        <div className="mt-[5px]" onClick={updateProfile}>
+
+        <div className="mt-2" onClick={updateProfile}>
           <Button fullWidth isDoing={state.loading} isDone={state.done}>
             确定
           </Button>
@@ -334,17 +334,14 @@ const ProfileEditor = observer((props: IProps) => {
   );
 });
 
-export default observer((props: IProps) => {
-  return (
-    <Dialog
-      disableBackdropClick={false}
-      open={props.open}
-      onClose={() => props.onClose()}
-      transitionDuration={{
-        enter: 300,
-      }}
-    >
-      <ProfileEditor {...props} />
-    </Dialog>
-  );
-});
+export default observer((props: IProps) => (
+  <Dialog
+    open={props.open}
+    onClose={() => props.onClose()}
+    transitionDuration={{
+      enter: 300,
+    }}
+  >
+    <ProfileEditor {...props} />
+  </Dialog>
+));

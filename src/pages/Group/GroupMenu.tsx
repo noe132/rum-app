@@ -1,12 +1,12 @@
 import React from 'react';
 import { observer, useLocalObservable } from 'mobx-react-lite';
-import { FiMoreHorizontal } from 'react-icons/fi';
+import { FiMoreHorizontal, FiDelete } from 'react-icons/fi';
 import { MdInfoOutline } from 'react-icons/md';
-import { HiOutlineShare } from 'react-icons/hi';
-import { FiDelete } from 'react-icons/fi';
+import { HiOutlineShare, HiOutlineBan } from 'react-icons/hi';
 import { Menu, MenuItem } from '@material-ui/core';
 import ShareModal from './ShareModal';
 import GroupInfoModal from './GroupInfoModal';
+import UnFollowingsModal from './UnFollowingsModal';
 import { useStore } from 'store';
 import GroupApi from 'apis/group';
 import { sleep } from 'utils';
@@ -23,12 +23,13 @@ export default observer(() => {
     nodeStore,
   } = useStore();
   const isCurrentGroupOwner = useIsGroupOwner(
-    groupStore.map[activeGroupStore.id]
+    groupStore.map[activeGroupStore.id],
   );
   const state = useLocalObservable(() => ({
     anchorEl: null,
     showShareModal: false,
     showGroupInfoModal: false,
+    showUnFollowingsModal: false,
   }));
 
   const handleMenuClick = (event: any) => {
@@ -49,26 +50,32 @@ export default observer(() => {
     state.showShareModal = true;
   };
 
+  const openUnFollowingsModal = () => {
+    handleMenuClose();
+    state.showUnFollowingsModal = true;
+  };
+
   const handleExitConfirm = async (
     options: {
-      isOwner?: boolean;
-    } = {}
+      isOwner?: boolean
+    } = {},
   ) => {
     confirmDialogStore.setLoading(true);
     try {
       const removedGroupId = activeGroupStore.id;
-      (await options.isOwner)
-        ? GroupApi.deleteGroup(removedGroupId)
-        : GroupApi.leaveGroup(removedGroupId);
+      if (options.isOwner) {
+        await GroupApi.deleteGroup(removedGroupId);
+      } else {
+        await GroupApi.leaveGroup(removedGroupId);
+      }
       await sleep(500);
       runInAction(() => {
         const firstExistsGroup = groupStore.groups.filter(
-          (group) => group.GroupId !== removedGroupId
+          (group) => group.GroupId !== removedGroupId,
         )[0];
         activeGroupStore.setId(
-          firstExistsGroup ? firstExistsGroup.GroupId : ''
+          firstExistsGroup ? firstExistsGroup.GroupId : '',
         );
-        activeGroupStore.clearAfterGroupChanged();
         groupStore.deleteGroup(removedGroupId);
         seedStore.deleteSeed(nodeStore.storagePath, removedGroupId);
       });
@@ -89,7 +96,7 @@ export default observer(() => {
 
   const leaveGroup = () => {
     confirmDialogStore.show({
-      content: `确定要离开群组吗？`,
+      content: '确定要离开群组吗？',
       okText: '确定',
       isDangerous: true,
       ok: async () => {
@@ -101,7 +108,7 @@ export default observer(() => {
 
   const deleteGroup = () => {
     confirmDialogStore.show({
-      content: `确定要删除群组吗？`,
+      content: '确定要删除群组吗？',
       okText: '确定',
       isDangerous: true,
       ok: async () => {
@@ -152,6 +159,16 @@ export default observer(() => {
               <span className="font-bold">分享</span>
             </div>
           </MenuItem>
+          {activeGroupStore.unFollowingSet.size > 0 && (
+            <MenuItem onClick={() => openUnFollowingsModal()}>
+              <div className="flex items-center text-gray-600 leading-none pl-1 py-2">
+                <span className="flex items-center mr-3">
+                  <HiOutlineBan className="text-16 opacity-50" />
+                </span>
+                <span className="font-bold">屏蔽</span>
+              </div>
+            </MenuItem>
+          )}
           {!isCurrentGroupOwner && (
             <MenuItem onClick={() => leaveGroup()}>
               <div className="flex items-center text-red-400 leading-none pl-1 py-2">
@@ -184,6 +201,12 @@ export default observer(() => {
         open={state.showGroupInfoModal}
         onClose={() => {
           state.showGroupInfoModal = false;
+        }}
+      />
+      <UnFollowingsModal
+        open={state.showUnFollowingsModal}
+        onClose={() => {
+          state.showUnFollowingsModal = false;
         }}
       />
     </div>

@@ -1,22 +1,22 @@
 import React from 'react';
 import { observer, useLocalObservable } from 'mobx-react-lite';
 import { BiUser } from 'react-icons/bi';
-import { RiAddLine } from 'react-icons/ri';
-import { RiErrorWarningFill } from 'react-icons/ri';
+import { RiAddLine, RiErrorWarningFill } from 'react-icons/ri';
 import { MdPeopleOutline } from 'react-icons/md';
 import classNames from 'classnames';
-import { Menu, MenuItem } from '@material-ui/core';
+import { Menu, MenuItem, Badge } from '@material-ui/core';
 import Tooltip from '@material-ui/core/Tooltip';
 import GroupEditorModal from './GroupEditorModal';
 import MyNodeInfoModal from './MyNodeInfoModal';
 import JoinGroupModal from './JoinGroupModal';
 import GroupMenu from './GroupMenu';
 import { useStore } from 'store';
-import { FilterType } from 'store/activeGroup';
 import { DEFAULT_LATEST_STATUS } from 'store/group';
-import { Badge } from '@material-ui/core';
-import { remote } from 'electron';
+import { app } from '@electron/remote';
 import { isProduction } from 'utils/env';
+import { ObjectsFilterType } from 'store/activeGroup';
+import { sum } from 'lodash';
+import Fade from '@material-ui/core/Fade';
 
 export default observer(() => {
   const { groupStore, activeGroupStore, nodeStore } = useStore();
@@ -33,10 +33,10 @@ export default observer(() => {
     if (activeGroupStore.id !== groupId) {
       activeGroupStore.setSwitchLoading(true);
       activeGroupStore.setId(groupId);
-    }
-    if (activeGroupStore.id === groupId && !activeGroupStore.isFilterAll) {
-      activeGroupStore.setFilterUserIdSet([]);
-      activeGroupStore.setFilterType(FilterType.ALL);
+    } else if (activeGroupStore.objectsFilter.type !== ObjectsFilterType.ALL) {
+      activeGroupStore.setObjectsFilter({
+        type: ObjectsFilterType.ALL,
+      });
     }
   };
 
@@ -67,13 +67,13 @@ export default observer(() => {
       <div className="pl-4 pr-3 leading-none h-13 flex items-center justify-between text-gray-500 border-b border-gray-200 font-bold">
         <Tooltip
           placement="right"
-          title={`版本：${remote.app.getVersion()}`}
+          title={`版本：${app.getVersion()}`}
           arrow
         >
           <div className="flex items-center">
             <img
               src={`${
-                isProduction ? process.resourcesPath : remote.app.getAppPath()
+                isProduction ? process.resourcesPath : app.getAppPath()
               }/assets/logo.png`}
               alt="logo"
               width="24"
@@ -139,57 +139,73 @@ export default observer(() => {
         </Menu>
       </div>
       <div className="flex-1 overflow-y-auto">
-        {groupStore.groups.map((group: any) => (
-          <div key={group.GroupId}>
-            <div
-              className={classNames(
-                {
-                  'bg-black text-white': activeGroupStore.id === group.GroupId,
-                  'bg-white text-black': activeGroupStore.id !== group.GroupId,
-                  'text-gray-4a': activeGroupStore.id !== group.GroupId,
-                },
-                'leading-none font-bold text-14 py-4 px-4 cursor-pointer tracking-wider flex justify-between items-center item relative'
-              )}
-              onClick={() => openGroup(group.GroupId)}
-            >
-              <div className="py-1 truncate">{group.GroupName} </div>
-              {activeGroupStore.id === group.GroupId &&
-                !(latestStatusMap[group.GroupId] || DEFAULT_LATEST_STATUS)
-                  .unreadCount && (
-                  <div
-                    onClick={(e: any) => {
-                      e.stopPropagation();
-                    }}
-                    className="menu text-20 text-white -mr-2"
-                  >
-                    <GroupMenu />
-                  </div>
+        {groupStore.groups.map((group: any) => {
+          const latestStatus = latestStatusMap[group.GroupId] || DEFAULT_LATEST_STATUS;
+          return (
+            <div key={group.GroupId}>
+              <div
+                className={classNames(
+                  {
+                    'bg-black text-white':
+                      activeGroupStore.id === group.GroupId,
+                    'bg-white text-black':
+                      activeGroupStore.id !== group.GroupId,
+                    'text-gray-4a': activeGroupStore.id !== group.GroupId,
+                  },
+                  'leading-none font-bold text-14 py-4 px-4 cursor-pointer tracking-wider flex justify-between items-center item relative',
                 )}
-              <div className="absolute top-0 right-0 h-full flex items-center mr-5">
-                <Badge
-                  className="transform scale-90 mr-1"
-                  classes={{
-                    badge: classNames(
-                      activeGroupStore.id === group.GroupId &&
-                        'bg-white text-black',
-                      activeGroupStore.id !== group.GroupId &&
-                        'bg-black text-white'
-                    ),
-                  }}
-                  badgeContent={
-                    (latestStatusMap[group.GroupId] || DEFAULT_LATEST_STATUS)
-                      .unreadCount
-                  }
-                  invisible={
-                    !(latestStatusMap[group.GroupId] || DEFAULT_LATEST_STATUS)
-                      .unreadCount
-                  }
-                  variant="standard"
-                ></Badge>
+                onClick={() => openGroup(group.GroupId)}
+              >
+                <div className="py-1 truncate">{group.GroupName} </div>
+                {activeGroupStore.id === group.GroupId
+                  && !latestStatus.unreadCount && (
+                  <Fade in={true} timeout={500}>
+                    <div
+                      onClick={(e: any) => {
+                        e.stopPropagation();
+                      }}
+                      className="menu text-20 text-white -mr-2"
+                    >
+                      <GroupMenu />
+                    </div>
+                  </Fade>
+                )}
+                <div className="absolute top-0 right-0 h-full flex items-center mr-5">
+                  <Badge
+                    className="transform scale-90 mr-1"
+                    classes={{
+                      badge: classNames(
+                        activeGroupStore.id === group.GroupId
+                          && 'bg-white text-black',
+                        activeGroupStore.id !== group.GroupId
+                          && 'bg-black text-white',
+                      ),
+                    }}
+                    badgeContent={latestStatus.unreadCount}
+                    invisible={!latestStatus.unreadCount}
+                    variant="standard"
+                  />
+                  <Badge
+                    className="transform scale-90 mr-1"
+                    classes={{
+                      badge: 'bg-red-500',
+                    }}
+                    invisible={
+                      activeGroupStore.id === group.GroupId
+                      || latestStatus.unreadCount > 0
+                      || sum(
+                        Object.values(
+                          latestStatus.notificationUnreadCountMap || {},
+                        ),
+                      ) === 0
+                    }
+                    variant="dot"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       <GroupEditorModal
         open={state.showGroupEditorModal}

@@ -1,35 +1,34 @@
-import { IGroup } from 'apis/group';
+import GroupApi, { GroupStatus, IGroup } from 'apis/group';
 import Store from 'electron-store';
-import { runInAction } from 'mobx';
+import { action, observable, runInAction, when } from 'mobx';
+import type * as NotificationModel from 'hooks/useDatabase/models/notification';
 
-interface ILatestStatusMap {
-  [key: string]: ILatestStatus | null;
-}
+export type ILatestStatusMap = Record<string, ILatestStatus | null>;
 
-interface IDraftMap {
-  [key: string]: string;
-}
+export type IDraftMap = Record<string, string>;
 
 export interface IProfile {
-  name: string;
-  avatar: string;
-  mixinUUID: string;
+  name: string
+  avatar: string
+  mixinUUID: string
 }
 
 export interface ILatestStatus {
-  latestTrxId: string;
-  latestTimeStamp: number;
-  latestObjectTimeStamp: number;
-  latestReadTimeStamp: number;
-  unreadCount: number;
+  latestTrxId: string
+  latestTimeStamp: number
+  latestObjectTimeStamp: number
+  latestReadTimeStamp: number
+  unreadCount: number
+  notificationUnreadCountMap: NotificationModel.IUnreadCountMap
 }
 
 export interface ILatestStatusPayload {
-  latestTrxId?: string;
-  latestTimeStamp?: number;
-  latestObjectTimeStamp?: number;
-  latestReadTimeStamp?: number;
-  unreadCount?: number;
+  latestTrxId?: string
+  latestTimeStamp?: number
+  latestObjectTimeStamp?: number
+  latestReadTimeStamp?: number
+  unreadCount?: number
+  notificationUnreadCountMap?: NotificationModel.IUnreadCountMap
 }
 
 export const DEFAULT_LATEST_STATUS = {
@@ -38,6 +37,7 @@ export const DEFAULT_LATEST_STATUS = {
   latestObjectTimeStamp: 0,
   latestReadTimeStamp: 0,
   unreadCount: 0,
+  notificationUnreadCountMap: {} as NotificationModel.IUnreadCountMap,
 };
 
 export function createGroupStore() {
@@ -46,7 +46,9 @@ export function createGroupStore() {
   return {
     ids: <string[]>[],
 
-    map: {} as { [key: string]: IGroup },
+    map: {} as Record<string, IGroup & {
+      firstSyncDone: boolean
+    }>,
 
     electronStoreName: '',
 
@@ -91,19 +93,41 @@ export function createGroupStore() {
           if (!this.map[group.GroupId]) {
             this.ids.unshift(group.GroupId);
           }
-          this.map[group.GroupId] = group;
+          const newGroup = observable({
+            ...group,
+            firstSyncDone: false,
+          });
+          this.map[group.GroupId] = newGroup;
+
+          // trigger first sync
+          if (newGroup.GroupStatus === GroupStatus.GROUP_READY) {
+            this.syncGroup(newGroup.GroupId);
+          }
+          // wait until first sync
+          when(() => newGroup.GroupStatus === GroupStatus.GROUP_SYNCING)
+            .then(() =>
+              when(() => newGroup.GroupStatus === GroupStatus.GROUP_READY))
+            .then(
+              action(() => {
+                newGroup.firstSyncDone = true;
+              }),
+            );
         }
       });
     },
 
-    updateGroup(id: string, updatedGroup: IGroup) {
+    updateGroup(
+      id: string,
+      updatedGroup: Partial<IGroup & { backgroundSync: boolean }>,
+    ) {
+      if (!(id in this.map)) {
+        throw new Error(`group ${id} not found in map`);
+      }
       runInAction(() => {
         const group = this.map[id];
         if (group) {
-          group.LastUpdate = updatedGroup.LastUpdate;
-          group.LatestBlockNum = updatedGroup.LatestBlockNum;
-          group.LatestBlockId = updatedGroup.LatestBlockId;
-          group.GroupStatus = updatedGroup.GroupStatus;
+          const newGroup = { ...group, ...updatedGroup };
+          Object.assign(group, newGroup);
         }
       });
     },
@@ -136,7 +160,7 @@ export function createGroupStore() {
 
     updateLatestStatusMap(groupId: string, data: ILatestStatusPayload) {
       this.latestStatusMap[groupId] = {
-        ...(this.latestStatusMap[groupId] || DEFAULT_LATEST_STATUS),
+        ...this.latestStatusMap[groupId] || DEFAULT_LATEST_STATUS,
         ...data,
       };
       electronStore.set('latestStatusMap', this.latestStatusMap);
@@ -151,15 +175,36 @@ export function createGroupStore() {
       this.profileAppliedToAllGroups = profile;
       electronStore.set(
         'profileAppliedToAllGroups',
-        this.profileAppliedToAllGroups
+        this.profileAppliedToAllGroups,
       );
     },
 
+    async syncGroup(groupId: string) {
+      const group = this.map[groupId];
+
+      if (group.GroupStatus === GroupStatus.GROUP_SYNCING) {
+        return;
+      }
+
+      if (!group) {
+        throw new Error(`group ${groupId} not found in map`);
+      }
+
+      try {
+        this.updateGroup(groupId, {
+          GroupStatus: GroupStatus.GROUP_SYNCING,
+        });
+        await GroupApi.syncGroup(groupId);
+      } catch (e) {
+        console.log(e);
+      }
+    },
+
     _syncFromElectronStore() {
-      this.latestStatusMap = (electronStore.get('latestStatusMap') ||
-        {}) as ILatestStatusMap;
+      this.latestStatusMap = (electronStore.get('latestStatusMap')
+        || {}) as ILatestStatusMap;
       this.profileAppliedToAllGroups = (electronStore.get(
-        'profileAppliedToAllGroups'
+        'profileAppliedToAllGroups',
       ) || null) as IProfile | null;
       this.draftMap = (electronStore.get('draftMap') || {}) as IDraftMap;
     },

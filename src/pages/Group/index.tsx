@@ -30,26 +30,26 @@ export default observer(() => {
   }));
 
   React.useEffect(() => {
-    (async () => {
-      if (!nodeStore.canUseExternalMode) {
-        nodeStore.setMode('INTERNAL');
-        tryStartNode();
-      } else if (nodeStore.mode === 'EXTERNAL') {
-        connectExternalNode(
-          nodeStore.storeApiHost || nodeStore.apiHost,
-          nodeStore.storePort
-        );
-      } else if (nodeStore.mode === 'INTERNAL') {
-        tryStartNode();
-      } else {
-        state.showModeSelectorModal = true;
-      }
-    })();
+    if (!nodeStore.canUseExternalMode) {
+      nodeStore.setMode('INTERNAL');
+      tryStartNode();
+    } else if (nodeStore.mode === 'EXTERNAL') {
+      connectExternalNode(
+        nodeStore.storeApiHost || nodeStore.apiHost,
+        nodeStore.storePort,
+        nodeStore.cert,
+      );
+    } else if (nodeStore.mode === 'INTERNAL') {
+      tryStartNode();
+    } else {
+      state.showModeSelectorModal = true;
+    }
     (window as any).Quorum = Quorum;
 
-    async function connectExternalNode(apiHost: string, port: number) {
+    async function connectExternalNode(apiHost: string, port: number, cert: string) {
       nodeStore.setMode('EXTERNAL');
       nodeStore.setPort(port);
+      Quorum.setCert(cert);
       const storagePath = path.join(__dirname, '../', 'quorum_data');
       await fs.ensureDir(storagePath);
       nodeStore.setStoragePath(storagePath);
@@ -112,16 +112,17 @@ export default observer(() => {
       } catch (err) {
         console.error(err);
         confirmDialogStore.show({
-          content: `群组没能正常启动，请再尝试一下`,
+          content: '群组没能正常启动，请再尝试一下',
           okText: '重新启动',
           ok: () => {
             confirmDialogStore.hide();
             window.location.reload();
           },
-          cancelText: '重置节点',
+          cancelText: '切换节点',
           cancel: async () => {
             confirmDialogStore.hide();
             nodeStore.setQuitting(true);
+            nodeStore.setStoragePath('');
             modalStore.pageLoading.show();
             await sleep(400);
             await Quorum.down();
@@ -145,7 +146,7 @@ export default observer(() => {
           stop = true;
           nodeStore.setConnected(true);
         } catch (err) {
-          count++;
+          count += 1;
           if (count > maxCount) {
             stop = true;
             throw new Error('fail to connect group');
@@ -185,7 +186,7 @@ export default observer(() => {
         />
         <ModeSelectorModal
           open={state.showModeSelectorModal}
-          onClose={() => (state.showModeSelectorModal = false)}
+          onClose={() => { state.showModeSelectorModal = false; }}
         />
       </div>
     );

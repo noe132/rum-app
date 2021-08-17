@@ -1,15 +1,22 @@
 const path = require('path');
 const fs = require('fs');
 const util = require('util');
-const child_process = require('child_process');
+const childProcess = require('child_process');
 const { app, ipcMain } = require('electron');
 const log = require('electron-log');
 const getPort = require('get-port');
-const pmkdir = util.promisify(fs.mkdir);
+const watch = require('node-watch');
 
+const pmkdir = util.promisify(fs.mkdir);
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 const isProduction = !isDevelopment;
+const quorumBaseDir = path.join(
+  isProduction ? process.resourcesPath : app.getAppPath(),
+  'quorum_bin',
+);
+const certDir = path.join(quorumBaseDir, 'certs');
+const certPath = path.join(quorumBaseDir, 'certs/server.crt');
 
 const state = {
   process: null,
@@ -18,6 +25,8 @@ const state = {
   bootstrapId: '',
   storagePath: '',
   logs: '',
+  cert: '',
+  userInputCert: '',
 
   get up() {
     return !!this.process;
@@ -46,10 +55,6 @@ const actions = {
       darwin: 'quorum_darwin',
       win32: 'quorum_win.exe',
     };
-    const quorumBaseDir = path.join(
-      isProduction ? process.resourcesPath : app.getAppPath(),
-      'quorum_bin',
-    );
     const cmd = path.join(
       quorumBaseDir,
       quorumFileName[process.platform],
@@ -69,7 +74,7 @@ const actions = {
       '-configdir',
       `${storagePath}/peerConfig`,
       '-datadir',
-      `${storagePath}/peerData`
+      `${storagePath}/peerData`,
     ];
 
     // ensure config dir
@@ -84,9 +89,9 @@ const actions = {
     state.storagePath = storagePath;
     state.port = apiPort;
 
-    const peerProcess = child_process.spawn(cmd, args, {
+    const peerProcess = childProcess.spawn(cmd, args, {
       cwd: quorumBaseDir,
-    })
+    });
     state.process = peerProcess;
 
     const handleData = (data) => {
@@ -94,13 +99,13 @@ const actions = {
       if (state.logs.length > 131072) {
         state.logs = state.logs.slice(131072 - state.logs.length);
       }
-    }
+    };
 
     peerProcess.stdout.on('data', handleData);
     peerProcess.stderr.on('data', handleData);
     peerProcess.on('exit', () => {
       state.process = null;
-    })
+    });
 
     return this.status();
   },
@@ -112,9 +117,12 @@ const actions = {
     state.process = null;
     return this.status();
   },
+  set_cert(param) {
+    state.userInputCert = param.cert ?? '';
+  },
 };
 
-const initQuorum = () => {
+const initQuorum = async () => {
   ipcMain.on('quorum', async (event, arg) => {
     try {
       const result = await actions[arg.action](arg.param);
@@ -135,8 +143,27 @@ const initQuorum = () => {
       });
     }
   });
-}
+
+  await fs.promises.mkdir(certDir).catch(() => 1);
+
+  const loadCert = async () => {
+    try {
+      const buf = await fs.promises.readFile(certPath);
+      state.cert = buf.toString();
+    } catch (e) {
+      state.cert = '';
+    }
+  };
+
+  watch(
+    certDir,
+    { recursive: true },
+    loadCert,
+  );
+  loadCert();
+};
 
 module.exports = {
+  state,
   initQuorum,
 };

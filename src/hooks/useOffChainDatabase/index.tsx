@@ -8,27 +8,26 @@ const useOffChainDatabase = () => {
   if (!database) {
     database = new OffChainDatabase(nodeStore.info.node_publickey);
   }
-  return database as OffChainDatabase;
+  return database;
 };
 
 export default useOffChainDatabase;
 
 export class OffChainDatabase extends Dexie {
-  follows: Dexie.Table<IDbFollowItem, number>;
+  unFollowings: Dexie.Table<IDbUnFollowingItem, number>;
 
   constructor(nodePublickey: string) {
     super(`OffChainDatabase_${nodePublickey}`);
-    this.version(1).stores({
-      follows: '++Id, GroupId, Publisher, Following',
+    this.version(2).stores({
+      unFollowings: '++Id, GroupId, Publisher',
     });
-    this.follows = this.table('follows');
+    this.unFollowings = this.table('unFollowings');
   }
 }
 
-export interface IDbFollowItem {
-  Id?: number;
-  GroupId: string;
-  Publisher: string;
-  Following: string;
-  TimeStamp: number;
+export interface IDbUnFollowingItem {
+  Id?: number
+  GroupId: string
+  Publisher: string
+  TimeStamp: number
 }

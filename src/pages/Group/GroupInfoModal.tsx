@@ -7,8 +7,8 @@ import { ago } from 'utils';
 import useActiveGroup from 'store/selectors/useActiveGroup';
 
 interface IProps {
-  open: boolean;
-  onClose: () => void;
+  open: boolean
+  onClose: () => void
 }
 
 const GroupInfo = observer(() => {
@@ -56,7 +56,7 @@ const GroupInfo = observer(() => {
           <div className="mt-4 flex items-center">
             <span className="w-20">最近更新：</span>
             <span className="text-gray-4a opacity-90">
-              {ago(new Date(activeGroup.LastUpdate / 1000000).toISOString())}
+              {ago(activeGroup.LastUpdate)}
             </span>
           </div>
           <div className="mt-4 flex items-center">
@@ -69,17 +69,14 @@ const GroupInfo = observer(() => {
   );
 });
 
-export default observer((props: IProps) => {
-  return (
-    <Dialog
-      disableBackdropClick={false}
-      open={props.open}
-      onClose={() => props.onClose()}
-      transitionDuration={{
-        enter: 300,
-      }}
-    >
-      <GroupInfo />
-    </Dialog>
-  );
-});
+export default observer((props: IProps) => (
+  <Dialog
+    open={props.open}
+    onClose={() => props.onClose()}
+    transitionDuration={{
+      enter: 300,
+    }}
+  >
+    <GroupInfo />
+  </Dialog>
+));

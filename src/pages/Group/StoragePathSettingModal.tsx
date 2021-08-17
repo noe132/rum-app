@@ -5,13 +5,13 @@ import Button from 'components/Button';
 import Tooltip from '@material-ui/core/Tooltip';
 import { sleep } from 'utils';
 import { useStore } from 'store';
-import { remote } from 'electron';
+import { dialog } from '@electron/remote';
 import fs from 'fs-extra';
 
 interface IProps {
-  force?: boolean;
-  open: boolean;
-  onClose: (changed?: boolean) => void;
+  force?: boolean
+  open: boolean
+  onClose: (changed?: boolean) => void
 }
 
 const StoragePathSetting = observer((props: IProps) => {
@@ -37,7 +37,7 @@ const StoragePathSetting = observer((props: IProps) => {
 
   const openDirectory = async () => {
     try {
-      const file = await remote.dialog.showOpenDialog({
+      const file = await dialog.showOpenDialog({
         properties: ['openDirectory'],
       });
       if (!file.canceled && file.filePaths) {
@@ -109,8 +109,8 @@ const StoragePathSetting = observer((props: IProps) => {
               <div className="text-left p-2 pl-3 border border-gray-300 text-gray-500 text-12 truncate flex-1 rounded-l-12 border-r-0">
                 <Tooltip placement="top" title={state.path} arrow interactive>
                   <div className="tracking-wide">
-                    {state.path.length > 21
-                      ? `...${state.path.slice(-21)}`
+                    {state.path.length > 18
+                      ? `...${state.path.slice(-18)}`
                       : state.path}
                   </div>
                 </Tooltip>
@@ -134,18 +134,21 @@ const StoragePathSetting = observer((props: IProps) => {
   );
 });
 
-export default observer((props: IProps) => {
-  return (
-    <Dialog
-      disableBackdropClick={props.force}
-      hideCloseButton={props.force}
-      open={props.open}
-      onClose={() => props.onClose(false)}
-      transitionDuration={{
-        enter: 300,
-      }}
-    >
-      <StoragePathSetting {...props} />
-    </Dialog>
-  );
-});
+export default observer((props: IProps) => (
+  <Dialog
+    disableEscapeKeyDown={props.force}
+    hideCloseButton={props.force}
+    open={props.open}
+    onClose={(_, r) => {
+      if (['backdropClick', 'escapeKeyDown'].includes(r) && props.force) {
+        return;
+      }
+      props.onClose(false);
+    }}
+    transitionDuration={{
+      enter: 300,
+    }}
+  >
+    <StoragePathSetting {...props} />
+  </Dialog>
+));
