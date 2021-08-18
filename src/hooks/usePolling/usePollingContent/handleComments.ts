@@ -100,6 +100,16 @@ export default async (options: IOptions) => {
             store,
           });
         }
+
+        if (store.activeGroupStore.objectTrxIdSet.has(Content.objectTrxId)) {
+          const latestObject = await ObjectModel.get(database, {
+            TrxId: Content.objectTrxId,
+          });
+          console.log({ latestObject });
+          if (latestObject) {
+            store.activeGroupStore.updateObject(latestObject.TrxId, latestObject);
+          }
+        }
       }
     } catch (err) {
       console.log(err);

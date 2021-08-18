@@ -13,6 +13,7 @@ import { sleep } from 'utils';
 import useIsGroupOwner from 'store/selectors/useIsGroupOwner';
 import { runInAction } from 'mobx';
 import useDatabase from 'hooks/useDatabase';
+import getSortedGroups from 'store/selectors/getSortedGroups';
 
 export default observer(() => {
   const {
@@ -72,10 +73,11 @@ export default observer(() => {
         await GroupApi.leaveGroup(removedGroupId);
       }
       await sleep(500);
+      const sortedGroups = getSortedGroups(groupStore.groups, latestStatusStore.map);
+      const firstExistsGroup = sortedGroups.filter(
+        (group) => group.GroupId !== removedGroupId,
+      )[0];
       runInAction(() => {
-        const firstExistsGroup = groupStore.groups.filter(
-          (group) => group.GroupId !== removedGroupId,
-        )[0];
         activeGroupStore.setId(
           firstExistsGroup ? firstExistsGroup.GroupId : '',
         );

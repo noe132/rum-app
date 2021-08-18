@@ -16,10 +16,11 @@ import { isProduction } from 'utils/env';
 import { ObjectsFilterType } from 'store/activeGroup';
 import { sum } from 'lodash';
 import Fade from '@material-ui/core/Fade';
+import getSortedGroups from 'store/selectors/getSortedGroups';
 
 export default observer(() => {
-  const { groupStore, activeGroupStore, nodeStore, latestStatusStore } = useStore();
-  const { groups } = groupStore;
+  const { activeGroupStore, nodeStore, groupStore, latestStatusStore } = useStore();
+  const sortedGroups = getSortedGroups(groupStore.groups, latestStatusStore.map);
   const state = useLocalObservable(() => ({
     anchorEl: null,
     showMenu: false,
@@ -27,17 +28,6 @@ export default observer(() => {
     showMyNodeInfoModal: false,
     showJoinGroupModal: false,
   }));
-
-  const sortedGroups = groups.sort((a, b) => {
-    const aStatus = latestStatusStore.map[a.GroupId] || latestStatusStore.DEFAULT_LATEST_STATUS;
-    const bStatus = latestStatusStore.map[b.GroupId] || latestStatusStore.DEFAULT_LATEST_STATUS;
-    const aTimeStamp = aStatus.latestObjectTimeStamp || aStatus.latestTimeStamp;
-    const bTimeStamp = bStatus.latestObjectTimeStamp || bStatus.latestTimeStamp;
-    if (aTimeStamp === 0) {
-      return 1;
-    }
-    return bTimeStamp - aTimeStamp;
-  });
 
   const openGroup = (groupId: string) => {
     if (activeGroupStore.id !== groupId) {

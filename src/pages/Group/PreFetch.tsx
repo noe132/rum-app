@@ -5,7 +5,7 @@ import GroupApi from 'apis/group';
 import Bootstrap from './Bootstrap';
 
 export default observer(() => {
-  const { activeGroupStore, groupStore, nodeStore } = useStore();
+  const { groupStore, nodeStore } = useStore();
   const state = useLocalObservable(() => ({
     isFetched: false,
     isQuitting: false,
@@ -26,8 +26,6 @@ export default observer(() => {
         nodeStore.setNetwork(network);
         if (groups && groups.length > 0) {
           groupStore.addGroups(groups);
-          const firstGroup = groupStore.groups[0];
-          activeGroupStore.setId(firstGroup.GroupId);
         }
         state.isFetched = true;
       } catch (err) {

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { groupBy } from 'lodash';
 import { runInAction } from 'mobx';
 import type { IDbDerivedCommentItem } from 'hooks/useDatabase/models/comment';
 
@@ -25,7 +25,7 @@ export function createCommentStore() {
     },
 
     get commentsGroupMap() {
-      const map = _.groupBy(
+      const map = groupBy(
         this.comments,
         (comment) => comment.Content.objectTrxId,
       ) as Record<string, IDbDerivedCommentItem[]>;
@@ -37,7 +37,7 @@ export function createCommentStore() {
     },
 
     get subCommentsGroupMap() {
-      const map = _.groupBy(this.comments, (comment) => {
+      const map = groupBy(this.comments, (comment) => {
         const { threadTrxId } = comment.Content;
         if (threadTrxId && !this.map[threadTrxId]) {
           return 0;

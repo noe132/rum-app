@@ -27,6 +27,7 @@ import CommentReplyModal from 'components/CommentReplyModal';
 import ObjectDetailModal from 'components/ObjectDetailModal';
 import * as PersonModel from 'hooks/useDatabase/models/person';
 import * as globalProfileModel from 'hooks/useOffChainDatabase/models/globalProfile';
+import getSortedGroups from 'store/selectors/getSortedGroups';
 
 const OBJECTS_LIMIT = 20;
 
@@ -55,6 +56,11 @@ export default observer(() => {
       }
 
       if (!activeGroupStore.id) {
+        if (groupStore.groups.length > 0) {
+          const sortedGroups = getSortedGroups(groupStore.groups, latestStatusStore.map);
+          const firstGroup = sortedGroups[0];
+          activeGroupStore.setId(firstGroup.GroupId);
+        }
         return;
       }
 

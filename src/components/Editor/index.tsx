@@ -34,7 +34,7 @@ export default observer((props: IProps) => {
 
   const saveDraft = React.useCallback(
     debounce((content: string) => {
-      props.saveDraft?.(content);
+      props.saveDraft?.(content.trim());
     }, 500),
     [],
   );
@@ -53,7 +53,7 @@ export default observer((props: IProps) => {
     }
     state.loading = true;
     try {
-      await props.submit(state.content);
+      await props.submit(state.content.trim());
       state.content = '';
     } catch (err) {
       state.loading = false;

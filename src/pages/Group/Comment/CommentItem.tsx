@@ -150,21 +150,19 @@ export default observer((props: IProps) => {
                       isTopComment
                     />
                   </div>
-                  {isOwner && (
-                    <div className='text-gray-af transform scale-75 absolute top-[-2px] right-0'>
-                      <ContentSyncStatus
-                        status={comment.Status}
-                        SyncedComponent={() => (
-                          <div className={classNames({
-                            'invisible group-hover:visible': comment.Status === ContentStatus.synced,
-                          }, 'absolute top-0 right-[-8px]')}
-                          >
-                            <CommentMenu trxId={comment.TrxId} />
-                          </div>
-                        )}
-                      />
-                    </div>
-                  )}
+                  <div className='text-gray-af transform scale-75 absolute top-[-2px] right-0'>
+                    <ContentSyncStatus
+                      status={comment.Status}
+                      SyncedComponent={() => (
+                        <div className={classNames({
+                          'invisible group-hover:visible': comment.Status === ContentStatus.synced,
+                        }, 'absolute top-0 right-[-8px]')}
+                        >
+                          <CommentMenu trxId={comment.TrxId} />
+                        </div>
+                      )}
+                    />
+                  </div>
                 </div>
               )}
               {isSubComment && (

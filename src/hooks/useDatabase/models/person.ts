@@ -38,6 +38,7 @@ export const getUser = async (
   } as IUser;
   if (options.withObjectCount) {
     user.objectCount = await SummaryModel.getCount(db, {
+      GroupId: options.GroupId,
       ObjectId: options.Publisher,
       ObjectType: SummaryModel.SummaryObjectType.publisherObject,
     });

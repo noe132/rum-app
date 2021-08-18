@@ -51,6 +51,7 @@ const syncSummary = async (db: Database, vote: IDbVoteItem) => {
   }
   const count = await db.votes
     .where({
+      GroupId: vote.GroupId,
       'Content.type': vote.Content.type,
       'Content.objectTrxId': vote.Content.objectTrxId,
       'Content.objectType': vote.Content.objectType,

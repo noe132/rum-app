@@ -75,6 +75,7 @@ const syncSummary = async (
   }
   const count = await db.notifications
     .where({
+      GroupId: notification.GroupId,
       Type: notification.Type,
       Status: NotificationStatus.unread,
     })
