@@ -226,6 +226,7 @@ const ProfileEditor = observer((props: IProps) => {
           await globalProfileModel.createOrUpdate(offChainDatabase, {
             name: state.profile.name,
             avatar: state.profile.avatar,
+            mixinUID: state.profile.mixinUID,
           });
         }
       }
