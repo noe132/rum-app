@@ -24,9 +24,9 @@ interface IProps {
 }
 
 interface BindMixinModalProps {
-  open: boolean;
-  onClose: () => void;
-  onBind: (mixinUUID: string) => void;
+  open: boolean
+  onClose: () => void
+  onBind: (mixinUID: string) => void
 }
 
 const MixinOAuth = observer((props: BindMixinModalProps) => {
@@ -41,13 +41,13 @@ const MixinOAuth = observer((props: BindMixinModalProps) => {
   }));
 
 
-  const loadStop = React.useCallback(async () => {
+  const loadStop = React.useCallback(() => {
     if ((state.webview as any)?.getURL() === state.oauthUrl) {
       runInAction(() => {
-        state.webviewLoading = false
-      })
+        state.webviewLoading = false;
+      });
     }
-  },[]);
+  }, []);
 
   const handleOauthFailure = () => {
     onClose();
@@ -55,19 +55,19 @@ const MixinOAuth = observer((props: BindMixinModalProps) => {
       message: '获取mixin信息失败',
       type: 'error',
     });
-  }
+  };
 
   const redirecting = React.useCallback(async (event: Event) => {
     const currentUrl = (event as Event & {url: string}).url;
     if (currentUrl !== state.oauthUrl) {
       runInAction(() => {
         state.webviewLoading = true;
-      })
+      });
       const regExp = /code=([^&#]*)/g;
       const code = regExp.exec(currentUrl)?.[1];
       if (code && state.verifier) {
         try {
-          const res = await getAccessToken({client_id, code, code_verifier: state.verifier});
+          const res = await getAccessToken({ client_id, code, code_verifier: state.verifier });
           if (res?.data?.access_token) {
             const res2 = await getUserProfile(res.data.access_token);
             if (res2?.data?.user_id) {
@@ -79,7 +79,7 @@ const MixinOAuth = observer((props: BindMixinModalProps) => {
           } else {
             handleOauthFailure();
           }
-        } catch(e) {
+        } catch (e) {
           console.warn(e);
           handleOauthFailure();
         }
@@ -87,23 +87,23 @@ const MixinOAuth = observer((props: BindMixinModalProps) => {
         handleOauthFailure();
       }
     }
-  },[]);
+  }, []);
 
   React.useEffect(() => {
-      const { verifier, challenge } = getVerifierAndChanllege();
-      const oauthUrl = getOAuthUrl(challenge);
-      state.verifier = verifier;
-      state.challenge = challenge;
-      state.oauthUrl = oauthUrl;
+    const { verifier, challenge } = getVerifierAndChanllege();
+    const oauthUrl = getOAuthUrl(challenge);
+    state.verifier = verifier;
+    state.challenge = challenge;
+    state.oauthUrl = oauthUrl;
   }, [state]);
 
   React.useEffect(() => {
-      state.webview?.addEventListener('did-stop-loading', loadStop);
-      state.webview?.addEventListener('will-navigate', redirecting);
+    state.webview?.addEventListener('did-stop-loading', loadStop);
+    state.webview?.addEventListener('will-navigate', redirecting);
     return () => {
       state.webview?.removeEventListener('did-stop-loading', loadStop);
       state.webview?.removeEventListener('will-navigate', redirecting);
-    }
+    };
   }, [state.oauthUrl]);
 
   return (
@@ -120,7 +120,7 @@ const MixinOAuth = observer((props: BindMixinModalProps) => {
                 {
                   hidden: state.webviewLoading,
                 },
-                'w-64 h-64'
+                'w-64 h-64',
               )}
             >
               <webview
@@ -151,7 +151,7 @@ const MixinOAuth = observer((props: BindMixinModalProps) => {
             outline
             fullWidth
             className="mr-4"
-            onClick={async () => {
+            onClick={() => {
               onClose();
             }}
           >
@@ -279,7 +279,7 @@ const ProfileEditor = observer((props: IProps) => {
           <div className="flex w-full px-12 mt-6">
             <div className="p-2 pl-3 border border-black border-opacity-20 text-gray-500 text-12 truncate flex-1 rounded-l-4 border-r-0 hover:border-opacity-100">
               <MiddleTruncate
-                string={state.profile.mixinUUID || ''}
+                string={state.profile.mixinUID || ''}
                 length={15}
               />
             </div>
@@ -323,11 +323,11 @@ const ProfileEditor = observer((props: IProps) => {
       </div>
       <BindMixinModal
         open={state.openBindMixinModal}
-        onBind={(mixinUUID: string) => {
-          state.profile.mixinUUID = mixinUUID;
+        onBind={(mixinUID: string) => {
+          state.profile.mixinUID = mixinUID;
         }}
         onClose={() => {
-          state.openBindMixinModal =  false;
+          state.openBindMixinModal = false;
         }}
       />
     </div>

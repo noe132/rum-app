@@ -71,6 +71,12 @@ export interface IObject {
   content: string
 }
 
+export interface IWalletItem {
+  id: string
+  type: string
+  name: string
+}
+
 export interface IPersonItem extends IContentItemBasic {
   Content: IPerson
 }
@@ -81,6 +87,7 @@ export interface IPerson {
     mediaType: string
     content: string
   }
+  wallet?: Array<IWalletItem>
 }
 
 export interface ICommentItem extends IContentItemBasic {
