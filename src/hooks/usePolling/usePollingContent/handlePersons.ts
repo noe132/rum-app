@@ -33,25 +33,31 @@ export default async (options: IOptions) => {
         await PersonModel.markedAsSynced(db, {
           TrxId: person.TrxId,
         });
-        continue;
+      } else {
+        await PersonModel.create(db, {
+          ...person,
+          GroupId: groupId,
+          Status: ContentStatus.synced,
+          LatestTrxId: '',
+        });
       }
-
-      await PersonModel.create(db, {
-        ...person,
-        GroupId: groupId,
-        Status: ContentStatus.synced,
-        LatestTrxId: '',
-      });
 
       if (
         groupId === store.activeGroupStore.id
         && person.Publisher === store.nodeStore.info.node_publickey
       ) {
-        const user = await PersonModel.getUser(db, {
-          GroupId: groupId,
-          Publisher: person.Publisher,
-        });
+        const [user, latestPersonStatus] = await Promise.all([
+          PersonModel.getUser(database, {
+            GroupId: groupId,
+            Publisher: person.Publisher,
+          }),
+          PersonModel.getLatestPersonStatus(database, {
+            GroupId: groupId,
+            Publisher: person.Publisher,
+          }),
+        ]);
         store.activeGroupStore.setProfile(user.profile);
+        store.activeGroupStore.setLatestPersonStatus(latestPersonStatus);
       }
     } catch (err) {
       console.log(err);

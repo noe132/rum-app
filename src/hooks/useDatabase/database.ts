@@ -51,8 +51,9 @@ export default class Database extends Dexie {
       const persons = await tx.table('persons').toArray();
       for (const person of persons) {
         await tx.table('persons').where({
+          GroupId: person.GroupId,
           Publisher: person.Publisher,
-        }).modify({
+        }).and((p) => p.Id !== person.Id).modify({
           LatestTrxId: person.TrxId,
         });
         await tx.table('persons').where({

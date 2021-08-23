@@ -21,12 +21,10 @@ export const get = async (db: Database, whereOptions: {
 };
 
 export const create = async (db: Database, person: IDbPersonItem) => {
-  await db.persons.where({
-    Publisher: person.Publisher,
-  }).modify({
-    LatestTrxId: person.TrxId,
-  });
   await db.persons.add(person);
+  if (person.Status === ContentStatus.synced) {
+    updateLatestTrx(db, person);
+  }
 };
 
 export const getUser = async (
@@ -38,11 +36,12 @@ export const getUser = async (
   },
 ) => {
   const person = await db.persons
-    .where({
+    .get({
       GroupId: options.GroupId,
       Publisher: options.Publisher,
-    })
-    .last();
+      Status: ContentStatus.synced,
+      LatestTrxId: '',
+    });
   const profile = _getProfile(options.Publisher, person || null);
   const user = {
     profile,
@@ -57,6 +56,21 @@ export const getUser = async (
     });
   }
   return user;
+};
+
+export const getLatestPersonStatus = async (
+  db: Database,
+  options: {
+    GroupId: string
+    Publisher: string
+  },
+) => {
+  const person = await db.persons
+    .where({
+      GroupId: options.GroupId,
+      Publisher: options.Publisher,
+    }).last();
+  return person ? person.Status : '' as ContentStatus;
 };
 
 export const has = async (
@@ -79,5 +93,19 @@ export const markedAsSynced = async (
 ) => {
   await db.persons.where(whereOptions).modify({
     Status: ContentStatus.synced,
+  });
+  const person = await db.persons.get(whereOptions);
+  if (person) {
+    updateLatestTrx(db, person);
+  }
+};
+
+const updateLatestTrx = async (db: Database, person: IDbPersonItem) => {
+  await db.persons.where({
+    GroupId: person.GroupId,
+    Publisher: person.Publisher,
+    Status: ContentStatus.synced,
+  }).and((p) => p.Id !== person.Id).modify({
+    LatestTrxId: person.TrxId,
   });
 };
