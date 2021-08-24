@@ -1,12 +1,13 @@
 require('./main/processLock');
 require('./main/log');
 require('@electron/remote/main').initialize();
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, Tray } = require('electron');
 const ElectronStore = require('electron-store');
 const { initQuorum, state: quorumState } = require('./main/quorum');
 const { handleUpdate } = require('./main/updater');
 const MenuBuilder = require('./main/menu');
 const { sleep } = require('./main/utils');
+const path = require('path');
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 const isProduction = !isDevelopment;
@@ -31,6 +32,7 @@ const main = () => {
         enableRemoteModule: true,
         nodeIntegration: true,
         webSecurity: !isDevelopment,
+        webviewTag: true,
       },
     });
 
@@ -44,9 +46,14 @@ const main = () => {
     menuBuilder.buildMenu();
 
     win.on('close', async (e) => {
-      if (app.quitPrompt) {
+      if (app.quitting) {
+        win = null;
+      } else {
         e.preventDefault();
-        win.webContents.send('main-before-quit');
+        win.hide();
+        if (process.platform === 'darwin') {
+          app.dock.hide();
+        }
       }
     });
 
@@ -57,17 +64,53 @@ const main = () => {
     }
   };
 
-  ipcMain.on('renderer-quit-prompt', () => {
+  let tray;
+  function createTray() {
+    let icon = path.join(__dirname, '/../assets/icons/64x64@4x.png');
+    if (process.platform === 'win32') {
+      icon = path.join(__dirname, '/../assets/icon.ico');
+    }
+    tray = new Tray(icon);
+    const showApp = () => {
+      win.show();
+      if (process.platform === 'darwin' && !app.dock.isVisible()) {
+        app.dock.show();
+      }
+    };
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: 'Show App',
+        click: showApp,
+      },
+      {
+        label: 'Quit',
+        click: () => {
+          if (app.quitPrompt) {
+            win.webContents.send('app-before-quit');
+          } else {
+            app.quit();
+          }
+        },
+      },
+    ]);
+    tray.on('double-click', showApp);
+    tray.setToolTip('Rum');
+    tray.setContextMenu(contextMenu);
+  }
+
+  ipcMain.on('app-quit-prompt', () => {
     app.quitPrompt = true;
   });
 
-  ipcMain.on('renderer-will-quit', () => {
-    app.quitPrompt = false;
+  app.on('before-quit', () => {
+    app.quitting = true;
   });
 
-  ipcMain.on('renderer-quit', () => {
+  ipcMain.on('app-quit', () => {
     app.quit();
   });
+
+  app.on('window-all-closed', () => {});
 
   app.on('second-instance', () => {
     if (win) {
@@ -76,15 +119,14 @@ const main = () => {
     }
   });
 
-  app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-      app.quit();
-    }
-  });
-
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
+    } else {
+      win.show();
+      if (process.platform === 'darwin' && !app.dock.isVisible()) {
+        app.dock.show();
+      }
     }
   });
 
@@ -112,6 +154,7 @@ const main = () => {
       console.log('Starting main process...');
     }
     createWindow();
+    createTray();
   });
 };
 
