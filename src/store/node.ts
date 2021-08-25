@@ -1,6 +1,5 @@
 import { INodeInfo, INetwork, INetworkGroup } from 'apis/group';
 import { ProcessStatus } from 'utils/quorum';
-import externalNodeMode from 'utils/storages/externalNodeMode';
 import Store from 'electron-store';
 import { isProduction, isStaging } from 'utils/env';
 
@@ -35,9 +34,7 @@ export function createNodeStore() {
 
     storagePath: (store.get('storagePath') || '') as string,
 
-    mode: (store.get('mode') || '') as Mode,
-
-    canUseExternalMode: externalNodeMode.enabled(),
+    mode: (store.get('mode') || 'INTERNAL') as Mode,
 
     electronStoreName: ELECTRON_STORE_NAME,
 
@@ -104,6 +101,7 @@ export function createNodeStore() {
     setMode(mode: Mode) {
       this.mode = mode;
       store.set('mode', mode);
+      console.log(store.get('mode'));
     },
 
     setInfo(info: INodeInfo) {
