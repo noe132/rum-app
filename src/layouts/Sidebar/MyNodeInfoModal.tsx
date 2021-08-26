@@ -1,4 +1,5 @@
 import React from 'react';
+import { ipcRenderer } from 'electron';
 import { observer, useLocalObservable } from 'mobx-react-lite';
 import Dialog from 'components/Dialog';
 import Button from 'components/Button';
@@ -34,6 +35,7 @@ const MyNodeInfo = observer(() => {
       okText: '确定',
       isDangerous: true,
       ok: async () => {
+        ipcRenderer.send('disable-app-quit-prompt');
         confirmDialogStore.setLoading(true);
         await sleep(800);
         confirmDialogStore.hide();
