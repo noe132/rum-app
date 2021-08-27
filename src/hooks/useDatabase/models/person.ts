@@ -33,14 +33,24 @@ export const getUser = async (
     GroupId: string
     Publisher: string
     withObjectCount?: boolean
+    latest?: boolean
   },
 ) => {
-  const person = await db.persons
-    .get({
-      GroupId: options.GroupId,
-      Publisher: options.Publisher,
-      Status: ContentStatus.synced,
-    });
+  let person;
+  if (options.latest) {
+    person = await db.persons
+      .where({
+        GroupId: options.GroupId,
+        Publisher: options.Publisher,
+      }).last();
+  } else {
+    person = await db.persons
+      .get({
+        GroupId: options.GroupId,
+        Publisher: options.Publisher,
+        Status: ContentStatus.synced,
+      });
+  }
   const profile = _getProfile(options.Publisher, person || null);
   const user = {
     profile,
