@@ -230,13 +230,6 @@ export default observer(() => {
                 <BackToTop elementSelector=".scroll-view" />
               </div>
             )}
-            {activeGroupStore.switchLoading && (
-              <Fade in={true} timeout={800}>
-                <div className="pt-64">
-                  <Loading size={22} />
-                </div>
-              </Fade>
-            )}
           </div>
         )}
         {!activeGroupStore.isActive && (

@@ -75,7 +75,7 @@ export default class Database extends Dexie {
       latestStatus: ['++Id', 'GroupId'].join(','),
     }).upgrade(async (tx) => {
       const persons = await tx.table('persons').toArray();
-      const groupedPerson = groupBy(persons, 'Publisher');
+      const groupedPerson = groupBy(persons, (person) => `${person.GroupId}${person.Publisher}`);
       for (const person of persons) {
         const groupPersons = groupedPerson[person.Publisher];
         if (groupPersons) {

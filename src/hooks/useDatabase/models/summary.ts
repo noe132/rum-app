@@ -47,7 +47,7 @@ export const getCount = async (
   return summary ? summary.Count : 0;
 };
 
-export const bulkGetCounts = async (
+export const getCounts = async (
   db: Database,
   queries: {
     GroupId: string

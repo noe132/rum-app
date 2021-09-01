@@ -1,9 +1,9 @@
 import Database, { IDbExtra } from 'hooks/useDatabase/database';
 import { ContentStatus } from 'hooks/useDatabase/contentStatus';
 import * as PersonModel from 'hooks/useDatabase/models/person';
-import * as VoteModel from 'hooks/useDatabase/models/vote';
 import * as SummaryModel from 'hooks/useDatabase/models/summary';
-import { IObjectItem, IVoteObjectType } from 'apis/group';
+import { IObjectItem } from 'apis/group';
+import { keyBy } from 'lodash';
 
 export interface IDbObjectItem extends IObjectItem, IDbExtra {}
 
@@ -43,7 +43,6 @@ export interface IListOptions {
   Publisher?: string
   excludedPublisherSet?: Set<string>
   searchText?: string
-  currentPublisher?: string
 }
 
 export const list = async (db: Database, options: IListOptions) => {
@@ -94,7 +93,6 @@ export const get = async (
   db: Database,
   options: {
     TrxId: string
-    currentPublisher?: string
   },
 ) => {
   const object = await db.objects.get({
@@ -105,74 +103,43 @@ export const get = async (
     return null;
   }
 
-  const result = await packObject(db, object, {
-    currentPublisher: options.currentPublisher,
-  });
+  const [result] = await packObjects(db, [object]);
 
   return result;
 };
 
-const packObject = async (
+export const bulkGet = async (
   db: Database,
-  object: IDbObjectItem,
-  options: {
-    currentPublisher?: string
-  } = {},
+  TrxIds: string[],
 ) => {
-  const [user, commentCount, upVoteCount, existVote] = await Promise.all([
-    PersonModel.getUser(db, {
-      GroupId: object.GroupId,
-      Publisher: object.Publisher,
-      withObjectCount: true,
-    }),
-    SummaryModel.getCount(db, {
-      ObjectId: object.TrxId,
-      ObjectType: SummaryModel.SummaryObjectType.objectComment,
-    }),
-    SummaryModel.getCount(db, {
-      ObjectId: object.TrxId,
-      ObjectType: SummaryModel.SummaryObjectType.objectUpVote,
-    }),
-    options.currentPublisher
-      ? VoteModel.get(db, {
-        Publisher: options.currentPublisher,
-        objectTrxId: object.TrxId,
-        objectType: IVoteObjectType.object,
-      })
-      : Promise.resolve(null),
-  ]);
-  return {
-    ...object,
-    Extra: {
-      user,
-      upVoteCount,
-      commentCount,
-      voted: !!existVote,
-    },
-  } as IDbDerivedObjectItem;
+  const objects = await db.objects.where('TrxId').anyOf(TrxIds).toArray();
+  const derivedObjects = await packObjects(db, objects);
+  const map = keyBy(derivedObjects, (object) => object.TrxId);
+  return TrxIds.map((TrxId) => map[TrxId] || null);
 };
-
 
 const packObjects = async (
   db: Database,
   objects: IDbObjectItem[],
 ) => {
   const [users, commentSummaries, upVoteSummaries] = await Promise.all([
-    PersonModel.bulkGetUsers(db, objects.map((object) => ({
+    PersonModel.getUsers(db, objects.map((object) => ({
       GroupId: object.GroupId,
       Publisher: object.Publisher,
+      withObjectCount: true,
     }))),
-    SummaryModel.bulkGetCounts(db, objects.map((object) => ({
+    SummaryModel.getCounts(db, objects.map((object) => ({
       GroupId: object.GroupId,
       ObjectId: object.TrxId,
       ObjectType: SummaryModel.SummaryObjectType.objectComment,
     }))),
-    SummaryModel.bulkGetCounts(db, objects.map((object) => ({
+    SummaryModel.getCounts(db, objects.map((object) => ({
       GroupId: object.GroupId,
       ObjectId: object.TrxId,
       ObjectType: SummaryModel.SummaryObjectType.objectUpVote,
     }))),
   ]);
+  console.log({ users });
   return objects.map((object, index) => ({
     ...object,
     Extra: {

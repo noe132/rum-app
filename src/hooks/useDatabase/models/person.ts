@@ -68,7 +68,7 @@ export const getUser = async (
   return user;
 };
 
-export const bulkGetUsers = async (
+export const getUsers = async (
   db: Database,
   queries: {
     GroupId: string
