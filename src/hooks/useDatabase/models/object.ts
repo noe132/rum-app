@@ -69,7 +69,7 @@ export const list = async (db: Database, options: IListOptions) => {
 
   const result = await db.transaction(
     'r',
-    [db.persons, db.summary, db.votes, db.objects],
+    [db.persons, db.summary, db.objects],
     async () => {
       const objects = await collection
         .reverse()
@@ -139,7 +139,6 @@ const packObjects = async (
       ObjectType: SummaryModel.SummaryObjectType.objectUpVote,
     }))),
   ]);
-  console.log({ users });
   return objects.map((object, index) => ({
     ...object,
     Extra: {

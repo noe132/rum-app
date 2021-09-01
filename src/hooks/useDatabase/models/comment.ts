@@ -88,23 +88,30 @@ export const list = async (
     offset?: number
   },
 ) => {
-  const comments = await db.comments
-    .where({
-      GroupId: options.GroupId,
-      'Content.objectTrxId': options.objectTrxId,
-    })
-    .offset(options.offset || 0)
-    .limit(options.limit)
-    .sortBy('TimeStamp');
+  const result = await db.transaction(
+    'r',
+    [db.comments, db.persons, db.summary, db.objects],
+    async () => {
+      const comments = await db.comments
+        .where({
+          GroupId: options.GroupId,
+          'Content.objectTrxId': options.objectTrxId,
+        })
+        .offset(options.offset || 0)
+        .limit(options.limit)
+        .sortBy('TimeStamp');
 
-  if (comments.length === 0) {
-    return [];
-  }
+      if (comments.length === 0) {
+        return [];
+      }
 
-  const result = await packComments(db, comments, {
-    withSubComments: true,
-  });
+      const result = await packComments(db, comments, {
+        withSubComments: true,
+      });
 
+      return result;
+    },
+  );
   return result;
 };
 

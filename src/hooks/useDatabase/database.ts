@@ -77,16 +77,14 @@ export default class Database extends Dexie {
       const persons = await tx.table('persons').toArray();
       const groupedPerson = groupBy(persons, (person) => `${person.GroupId}${person.Publisher}`);
       for (const person of persons) {
-        const groupPersons = groupedPerson[person.Publisher];
+        const groupPersons = groupedPerson[`${person.GroupId}${person.Publisher}`];
         if (groupPersons) {
           const latestPerson = groupPersons[groupPersons.length - 1];
-          if (latestPerson.Id !== person.Id) {
-            await tx.table('persons').where({
-              Id: person.Id,
-            }).modify({
-              Status: ContentStatus.replaced,
-            });
-          }
+          await tx.table('persons').where({
+            Id: person.Id,
+          }).modify({
+            Status: latestPerson.Id === person.Id ? ContentStatus.synced : ContentStatus.replaced,
+          });
         }
       }
     });

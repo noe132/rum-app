@@ -66,6 +66,10 @@ export default observer(() => {
 
       activeGroupStore.setSwitchLoading(true);
 
+      activeGroupStore.setObjectsFilter({
+        type: ObjectsFilterType.ALL,
+      });
+
       await activeGroupStore.fetchUnFollowings(offChainDatabase, {
         groupId: activeGroupStore.id,
         publisher: nodeStore.info.node_publickey,
