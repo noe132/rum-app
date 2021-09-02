@@ -29,6 +29,8 @@ interface BindMixinModalProps {
   onBind: (mixinUID: string) => void
 }
 
+const CURRENCIES = ['BTC', 'ETH', 'USDT', 'BOX', 'MOB', 'EOS', 'DOGE', 'USDC', 'pUSD', 'XIN'];
+
 const MixinOAuth = observer((props: BindMixinModalProps) => {
   const { snackbarStore } = useStore();
   const { onClose, onBind } = props;
@@ -191,13 +193,49 @@ const MixinPayment = observer(() => {
   const { modalStore } = useStore();
   const { name } = modalStore.mixinPayment.props;
   const state2 = useLocalObservable(() => ({
-    step: 1,
+    step: 3,
     amount: '',
     memo: '',
     selectedCurrency: '',
   }));
 
   const next = console.log;
+
+  const step1 = () => (
+    <div>
+      <div className="text-lg font-bold text-gray-700 -mt-1">选择币种</div>
+      <div className="flex flex-wrap justify-between mt-4 w-64 pb-2">
+        {CURRENCIES.map((currency: any) => (
+          <div key={currency} className="p-1" title={currency}>
+            <div
+              className="text-center border rounded p-3 px-5 cursor-pointer border-gray-300 text-gray-600 md:hover:border-blue-400 md:hover:text-blue-400"
+              onClick={() => {
+                localStorage.setItem('REWARD_CURRENCY', currency);
+                state2.selectedCurrency = currency;
+                state2.step = 2;
+              }}
+            >
+              <div className="w-8 h-8">
+                <img
+                  className="w-8 h-8"
+                  // src={currencyIconMap[currency]}
+                  alt={currency}
+                />
+              </div>
+              <div className="mt-2 leading-none text-xs currency tracking-wide">{currency}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <style jsx>{`
+        .currency {
+          font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial,
+            Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol,
+            Noto Color Emoji;
+        }
+      `}</style>
+    </div>
+  );
 
   const step2 = () => (
     <div className="w-auto mx-2">
@@ -321,7 +359,9 @@ const MixinPayment = observer(() => {
 
   return (
     <div className="bg-white rounded-12 text-center py-8 px-12">
-      { state2.step === 1 && (
+      { state2.step === 1 && step1()}
+      { state2.step === 2 && step2()}
+      { state2.step === 3 && (
         <div className="w-72">
           <div className="text-18 font-bold text-gray-700">编辑资料</div>
           <div className="mt-5">
@@ -401,7 +441,6 @@ const MixinPayment = observer(() => {
           </div>
         </div>
       )}
-      { state2.step === 2 && step2()}
       <BindMixinModal
         open={state.openBindMixinModal}
         onBind={(mixinUID: string) => {
