@@ -25,6 +25,7 @@ import SidebarMenu from 'layouts/Sidebar/SidebarMenu';
 import BackToTop from 'components/BackToTop';
 import CommentReplyModal from 'components/CommentReplyModal';
 import ObjectDetailModal from 'components/ObjectDetailModal';
+import MixinPaymentModal from 'components/MixinPaymentModal';
 import * as PersonModel from 'hooks/useDatabase/models/person';
 import * as globalProfileModel from 'hooks/useOffChainDatabase/models/globalProfile';
 import getSortedGroups from 'store/selectors/getSortedGroups';
@@ -244,6 +245,7 @@ export default observer(() => {
 
       <CommentReplyModal />
       <ObjectDetailModal />
+      <MixinPaymentModal />
 
       <style jsx>{`
         .scroll-view {
