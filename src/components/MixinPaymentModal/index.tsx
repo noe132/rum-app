@@ -12,7 +12,6 @@ import { getPaymentStatus } from 'apis/mixin';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import { app } from '@electron/remote';
 import { checkAmount, CURRENCIES, getMixinPaymentUrl } from './utils';
-import Fade from '@material-ui/core/Fade';
 import { v1 as uuidV1 } from 'uuid';
 
 const BASE_PASH = isProduction ? process.resourcesPath : `file://${app.getAppPath()}`;
@@ -253,101 +252,11 @@ const MixinPayment = observer(() => {
     </div>
   );
 
-  const step5 = () => (
-    <Fade in={true} timeout={500}>
-      <div className="py-8 px-12 text-center">
-        <div className="text-18 font-bold text-gray-700">Mixin 扫码支付</div>
-        <div className="relative overflow-hidden">
-          {state.paymentUrl && (
-            <div
-              className={classNames(
-                {
-                  hidden: state.iframeLoading,
-                },
-                'w-64 h-64',
-              )}
-            >
-              <iframe
-                onLoad={() => {
-                  setTimeout(() => {
-                    state.iframeLoading = false;
-                  }, 1000);
-                }}
-                src={state.paymentUrl}
-              />
-              <style jsx>{`
-                iframe {
-                  height: 506px;
-                  width: 800px;
-                  position: absolute;
-                  top: -238px;
-                  left: 0;
-                  margin-left: ${isWindow ? '-265px' : '-272px'};
-                  transform: scale(0.9);
-                }
-              `}</style>
-            </div>
-          )}
-          {state.iframeLoading && (
-            <div className="w-64 h-64 flex items-center justify-center">
-              <Loading size={30} />
-            </div>
-          )}
-        </div>
-        <div
-          className={classNames(
-            {
-              invisible: state.iframeLoading,
-            },
-            '-mt-3 text-gray-400 text-12 text-center',
-          )}
-        >
-          <div>也可以点击 Mixin 收到的链接完成支付</div>
-        </div>
-        <div className="flex justify-center mt-5">
-          <Button
-            outline
-            fullWidth
-            className="mr-4"
-            onClick={() => {
-              modalStore.mixinPayment.hide();
-            }}
-          >
-            取消
-          </Button>
-          <Button
-            fullWidth
-            onClick={() => {
-              modalStore.mixinPayment.hide();
-            }}
-          >
-            我已支付
-          </Button>
-        </div>
-        <div className="flex justify-center items-center mt-5 text-gray-400 text-12">
-          <span className="flex items-center mr-1">
-            <MdInfo className="text-16" />
-          </span>
-          手机还没有安装 Mixin ?
-          <a
-            className="text-indigo-400 ml-1"
-            href="https://mixin.one/messenger"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            前往下载
-          </a>
-        </div>
-      </div>
-    </Fade>
-  );
-
   return (
     <div className="bg-white rounded-12 text-center py-8 px-12">
       { state.step === 1 && step1()}
       { state.step === 2 && step2()}
       { state.step === 3 && step3()}
-      { state.step === 5 && step5()}
     </div>
   );
 });
