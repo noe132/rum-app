@@ -60,7 +60,7 @@ const MixinPaymentModel = observer((props: any) => {
         enter: 300,
       }}
     >
-      <MixinPayment close {...props} />
+      <MixinPayment close={close} {...props} />
     </Dialog>
   );
 });
