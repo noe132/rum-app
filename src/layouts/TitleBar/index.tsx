@@ -1,5 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
+import { observer } from 'mobx-react-lite';
 import { ipcRenderer } from 'electron';
 import { getCurrentWindow, shell } from '@electron/remote';
 import {
@@ -22,8 +23,8 @@ interface MenuItem {
   children?: Array<MenuItem>
 }
 
-export const TitleBar = (props: Props) => {
-  const { modalStore } = useStore();
+export const TitleBar = observer((props: Props) => {
+  const { modalStore, nodeStore } = useStore();
 
   const menuLeft: Array<MenuItem> = [
     {
@@ -93,7 +94,7 @@ export const TitleBar = (props: Props) => {
     },
   ];
   const menuRight: Array<MenuItem> = [
-    {
+    nodeStore.connected && {
       text: '节点与网络',
       action: () => {
         modalStore.myNodeInfo.open();
@@ -109,7 +110,7 @@ export const TitleBar = (props: Props) => {
     //   action: () => {
     //   },
     // },
-  ];
+  ].filter(<T extends unknown>(v: false | T): v is T => !!v);
 
   const handleMinimize = () => {
     getCurrentWindow().minimize();
@@ -254,4 +255,4 @@ export const TitleBar = (props: Props) => {
       </div>
     </div>
   </>);
-};
+});
