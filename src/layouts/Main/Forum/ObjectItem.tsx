@@ -17,7 +17,7 @@ import UserCard from 'components/UserCard';
 import ago from 'utils/ago';
 import useMixinPayment from 'standaloneModals/useMixinPayment';
 import * as EditorJsParser from './editorJsParser';
-import openPostDetail from './OpenPostDetail';
+import OpenObjectDetail from './OpenObjectDetail';
 import { assetsBasePath } from 'utils/env';
 
 interface IProps {
@@ -81,7 +81,7 @@ export default observer((props: IProps) => {
   return (
     <div className={classNames({
       'border border-gray-f2': props.withBorder,
-    }, 'rounded-12 bg-white px-8 pt-6 pb-6 w-full lg:w-[700px] box-border relative mb-[10px]')}
+    }, 'rounded-0 bg-white px-8 pt-6 pb-6 w-full lg:w-[650px] box-border relative mb-[10px]')}
     >
       <div className="relative group">
         <UserCard
@@ -156,7 +156,7 @@ export default observer((props: IProps) => {
           <div
             className="overflow-hidden relative cursor-pointer"
             onClick={() => {
-              openPostDetail({
+              OpenObjectDetail({
                 object,
               });
             }}

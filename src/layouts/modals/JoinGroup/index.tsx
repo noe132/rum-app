@@ -112,7 +112,7 @@ export const JoinGroup = observer(() => {
         enter: 300,
       }}
     >
-      <div className="bg-white rounded-12 text-center p-8 pb-4">
+      <div className="bg-white rounded-0 text-center p-8 pb-4">
         <div className="w-64">
           <div className="text-18 font-bold text-gray-700">加入群组</div>
           <div className="mt-4 pt-2" />
@@ -206,7 +206,7 @@ export const JoinGroup = observer(() => {
         enter: 300,
       }}
     >
-      <div className="bg-white rounded-12 text-center p-8 pb-7">
+      <div className="bg-white rounded-0 text-center p-8 pb-7">
         <div className="w-74">
           <div className="text-18 font-bold text-gray-700">加入群组</div>
           <div className="px-2 mt-3">

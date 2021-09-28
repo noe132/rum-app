@@ -81,7 +81,7 @@ export default observer(() => {
       onClose={() => modalStore.groupShare.close()}
       transitionDuration={300}
     >
-      <div className="bg-white rounded-12 text-center py-10 px-12">
+      <div className="bg-white rounded-0 text-center py-10 px-12">
         <div className="text-18 font-medium text-gray-4a">
           分享群组种子
         </div>

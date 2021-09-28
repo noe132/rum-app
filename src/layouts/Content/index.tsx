@@ -220,13 +220,13 @@ export default observer(() => {
 
   return (
     <div className="flex bg-white items-stretch h-full">
-      <Sidebar className="w-[280px] select-none z-10" />
+      <Sidebar className="w-[280px] select-none z-20" />
       <div className="flex-1 bg-gray-f7 overflow-hidden">
         {activeGroupStore.isActive && (
           <div className="relative flex flex-col h-full">
             <Header />
             {!activeGroupStore.switchLoading && (
-              <div className="flex flex-col flex-1 h-0 items-center overflow-y-auto scroll-view pt-6 relative" ref={scrollRef}>
+              <div className="flex-1 h-0 items-center overflow-y-auto scroll-view pt-6 relative" ref={scrollRef}>
                 <SidebarMenu />
                 <Feed rootRef={scrollRef} />
                 <BackToTop rootRef={scrollRef} />

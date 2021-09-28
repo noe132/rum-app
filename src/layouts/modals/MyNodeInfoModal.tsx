@@ -64,7 +64,7 @@ const MyNodeInfo = observer(() => {
   };
 
   return (
-    <div className="bg-white rounded-12 p-8">
+    <div className="bg-white rounded-0 p-8">
       <div className="w-70">
         <div className="text-18 font-bold text-gray-700 text-center">
           我的节点

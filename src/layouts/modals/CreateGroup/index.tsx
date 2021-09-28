@@ -155,7 +155,7 @@ export const CreateGroup = observer(() => {
       mountOnEnter
       unmountOnExit
     >
-      <div className="flex flex-col items-stretch absolute inset-0 top-[80px] bg-gray-f7 z-10">
+      <div className="flex flex-col items-stretch absolute inset-0 top-[80px] bg-gray-f7 z-50">
         <div
           className="flex flex-col items-center overflow-auto flex-1"
           ref={scrollBox}
@@ -198,8 +198,8 @@ export const CreateGroup = observer(() => {
               </div>
 
               <div className="text-16 px-7">
-                {state.type === 'timeline' && '根据时间线排列小组成员发布的内容，鼓励全体组员以短文的形式即时呈现自己的想法和状态。可以设定付费发布。'}
-                {state.type === 'post' && '以主题贴的形式发布内容，鼓励组员对某一个主题进行深入讨论，不鼓励重复发布相同的讨论内容。可以设定付费发布主题贴和付费发布讨论内容。'}
+                {state.type === 'timeline' && '根据时间线排列小组成员发布的内容，鼓励全体组员以短文的形式即时呈现自己的想法和状态'}
+                {state.type === 'post' && '以主题贴的形式发布内容，鼓励组员对某一个主题进行深入讨论，不鼓励重复发布相同的讨论内容'}
                 {/* {state.type === '2' && '订阅内容主要由小组发起人或受到认可的组员发布，组员通过订阅的形式接收内容。可以设定付费订阅。'} */}
               </div>
 
@@ -357,7 +357,7 @@ export const CreateGroup = observer(() => {
           </div>
 
           <StepBox
-            className="my-8"
+            className="my-8 hidden"
             total={1}
             value={state.step}
             onSelect={handleStepChange}

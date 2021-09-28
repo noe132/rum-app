@@ -175,7 +175,7 @@ export default observer((props: { object: IObjectItem }) => {
   return (
     <div>
       <div
-        className="text-gray-af px-2 opacity-80 cursor-pointer mt-[-3px]"
+        className="text-gray-af px-[2px] opacity-80 cursor-pointer mt-[-3px]"
         onClick={handleMenuClick}
       >
         <RiMoreFill className="text-20" />

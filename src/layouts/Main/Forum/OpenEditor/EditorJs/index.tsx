@@ -71,6 +71,7 @@ export default observer((props: any) => {
         placeholder: '请输入正文',
         onChange: (_api: any, block: any) => {
           (async () => {
+            await sleep(50);
             const outputData = await editorRef.current.save();
             props.onChange(JSON.stringify(outputData));
             await sleep(50);

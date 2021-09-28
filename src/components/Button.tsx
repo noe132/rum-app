@@ -31,7 +31,7 @@ export default (props: Props) => {
     isDone = false,
     fixedDone = false,
     hideText = false,
-    noRound = false,
+    noRound = true,
   } = props;
 
   return (

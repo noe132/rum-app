@@ -17,25 +17,25 @@ export default observer(() => {
       ref={rootRef}
       className={classNames({
         'justify-center py-10 px-8': !hasObject,
-        'justify-between pr-4 py-[6px]': hasObject,
+        'justify-between pr-4 py-[10px]': hasObject,
       }, 'bg-white flex items-center w-full mb-4')}
     >
       <div className="hidden">
         <Filter />
       </div>
       {hasObject && (
-        <div className="text-gray-700 text-16 leading-5 tracking-wide pl-6">
+        <div className="text-gray-700 text-15 leading-5 tracking-wide pl-6">
           最新帖子
         </div>
       )}
       <div>
         <Button
-          size="small"
+          size="mini"
           onClick={() => {
             OpenEditor();
           }}
         >
-          <RiAddLine className="ml-[-3px] mr-[1px] opacity-80 text-18" />
+          <RiAddLine className="ml-[-3px] mr-[1px] opacity-80 text-16" />
           {hasObject ? '发帖' : '发布第一个帖子'}
         </Button>
       </div>

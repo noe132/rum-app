@@ -141,7 +141,7 @@ export const StoragePath = observer((props: Props) => {
   };
 
   return (
-    <div className="bg-white rounded-12 text-center p-8 w-80">
+    <div className="bg-white rounded-0 text-center p-8 w-80">
       <div className="text-18 font-bold text-gray-700">
         {props.authType === 'signup' && '创建节点'}
         {props.authType === 'login' && '登录节点'}
