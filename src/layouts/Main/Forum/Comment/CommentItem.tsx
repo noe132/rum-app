@@ -135,7 +135,7 @@ export default observer((props: IProps) => {
           highlight,
           'mt-[10px] pt-5 pb-2': isTopComment,
           'pl-3': isTopComment && !subCommentsCount,
-          'mt-2 pl-3 pt-[15px] pb-[7px] bg-white w-full': isSubComment,
+          'mt-2 pl-3 pt-[15px] pb-[7px] bg-gray-f7 w-full': isSubComment,
         },
         'comment-item duration-500 ease-in-out group pr-2',
       )}

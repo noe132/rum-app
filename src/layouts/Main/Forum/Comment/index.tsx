@@ -109,7 +109,7 @@ export default observer((props: IProps) => {
             buttonClassName="transform scale-90"
           />
         </div>
-        <div className="mt-8 bg-gray-f2 h-[50px] w-full flex items-center">
+        <div className="mt-8 bg-white h-[50px] w-full flex items-center">
           <div
             className={classNames({
               'border-black text-black': state.order !== 'freshly',

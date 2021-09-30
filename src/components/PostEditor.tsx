@@ -64,7 +64,7 @@ export default observer((props: IProps) => {
   };
 
   return (
-    <div className="w-full bg-gray-88 pt-5 pl-10 pr-8 pb-2.5">
+    <div className="w-full border-t-[10px] border-t-gray-f7 bg-white pt-5 pl-10 pr-8 pb-2.5">
       <div className="w-full">
         <div
           className="relative"
@@ -145,7 +145,7 @@ export default observer((props: IProps) => {
           padding: 14px;
           font-weight: normal;
           border: 0px solid #f2f2f2 !important;
-          border-radius: 8px;
+          border-radius: 4px;
           resize: none;
         }
         .post-textarea-autosize.sm {

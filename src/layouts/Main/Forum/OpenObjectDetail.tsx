@@ -5,6 +5,7 @@ import { StoreProvider } from 'store';
 import { IDbDerivedObjectItem } from 'hooks/useDatabase/models/object';
 import * as EditorJsParser from './editorJsParser';
 import MainModal from 'components/MainModal';
+import Comment from './Comment';
 
 interface IProps {
   object: IDbDerivedObjectItem
@@ -54,7 +55,21 @@ const PostDetail = observer((props: {
   };
 
   return (
-    <MainModal open={state.open} onClose={close}>
+    <MainModal
+      open={state.open}
+      onClose={close}
+      bottomElement={() =>
+        (
+          <div className="flex flex-col justify-end flex-grow -mx-11">
+            <div className="bg-gray-f7">
+              <Comment
+                object={object}
+                inObjectDetailModal
+              />
+            </div>
+          </div>
+        )}
+    >
       <div className="py-1 px-1 pb-8">
         <h2 className="font-bold text-gray-700 text-22 leading-5 tracking-wide">{object.Content.name}</h2>
         <div

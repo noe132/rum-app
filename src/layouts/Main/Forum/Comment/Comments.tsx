@@ -72,7 +72,7 @@ export default observer((props: IProps) => {
             className={classNames({
               'pl-3 pb-2': hasSubComments,
             },
-            'bg-gray-f2 mt-2.5')}
+            'bg-white mt-2.5')}
             key={comment.TrxId}
           >
             <CommentItem
