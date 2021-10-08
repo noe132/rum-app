@@ -78,7 +78,7 @@ const actions = {
       '-datadir',
       `${storagePath}/peerData`,
       '-keystoredir',
-      `${storagePath}/keystoredir`,
+      `${storagePath}/keystore`,
     ];
 
     // ensure config dir
