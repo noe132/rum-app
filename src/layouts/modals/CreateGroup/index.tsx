@@ -14,7 +14,6 @@ import {
 
 import GroupApi from 'apis/group';
 import Button from 'components/Button';
-import { assetsBasePath } from 'utils/env';
 import sleep from 'utils/sleep';
 import { GROUP_TEMPLATE_TYPE } from 'utils/constant';
 import { useStore } from 'store';
