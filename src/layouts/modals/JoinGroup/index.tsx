@@ -64,7 +64,7 @@ export const JoinGroup = observer(() => {
       });
     } catch (err: any) {
       console.error(err);
-      if (err.includes('existed')) {
+      if (err.message.includes('existed')) {
         snackbarStore.show({
           message: '你已经是这个群组的成员',
           type: 'error',
