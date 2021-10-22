@@ -28,6 +28,7 @@ import NotebookIcon from 'assets/template/template_icon_notebook.svg?react';
 import Notification from './Notification';
 import { GROUP_TEMPLATE_TYPE } from 'utils/constant';
 import { shareGroup } from 'standaloneModals/shareGroup';
+import { lang } from 'utils/lang';
 
 export default observer(() => {
   const { activeGroupStore, nodeStore, groupStore } = useStore();
@@ -37,7 +38,6 @@ export default observer(() => {
     anchorEl: null,
     showMenu: false,
     loading: false,
-    showShareModal: false,
     showGroupInfoModal: false,
     showNatStatus: false,
     profile: {
@@ -117,7 +117,7 @@ export default observer(() => {
               </div>
               <SearchInput
                 className="w-64"
-                placeholder="搜索"
+                placeholder={lang.search}
                 size="small"
                 autoFocus
                 disabledClearButton
@@ -161,7 +161,7 @@ export default observer(() => {
                 enterDelay={400}
                 enterNextDelay={400}
                 placement="bottom"
-                title="点击同步最新内容"
+                title={lang.clickToSync}
                 arrow
                 interactive
               >
@@ -178,7 +178,7 @@ export default observer(() => {
             {showConnectionStatus && (
               <Tooltip
                 placement="bottom"
-                title={`你的节点已连接上网络中的 ${peersCount} 个节点`}
+                title={lang.connectedPeerCount(peersCount)}
                 arrow
                 interactive
               >
@@ -187,19 +187,19 @@ export default observer(() => {
                     className="bg-green-300 rounded-full mr-2 mt-px"
                     style={{ width: 8, height: 8 }}
                   />{' '}
-                  已连接 {peersCount} 个节点
+                  {lang.connectedPeerCount(peersCount)}
                 </div>
               </Tooltip>
             )}
             {showSyncTooltip && (
               <Fade in={true} timeout={500}>
                 <Tooltip
-                  title="正在检查并同步群组的最新内容，请您耐心等待"
+                  title={lang.syncingContentTip}
                   placement="bottom"
                 >
                   <div className="flex items-center">
                     <div className="flex items-center py-1 px-3 rounded-full bg-gray-d8 text-gray-6d text-12 leading-none ml-3 font-bold tracking-wide">
-                      <span className="mr-1">同步中</span> <Loading size={12} />
+                      <span className="mr-1">{lang.syncing}</span> <Loading size={12} />
                     </div>
                   </div>
                 </Tooltip>
@@ -211,7 +211,7 @@ export default observer(() => {
                   className="bg-red-300 rounded-full mr-2"
                   style={{ width: 8, height: 8 }}
                 />{' '}
-                你被禁止发言了，需要群主解禁才能发言和查看新内容
+                {lang.beBannedTip2}
               </div>
             )}
           </div>
@@ -236,16 +236,12 @@ export default observer(() => {
                   onClick={() => shareGroup(activeGroup.group_id)}
                 >
                   <HiOutlineShare className="text-20 mr-2" />
-                  分享种子
+                  {lang.shareSeed}
                 </div>
-                {/* <div className="flex flex-center text-link-blue cursor-pointer text-16">
-                  <AiOutlineUnorderedList className="text-20 mr-2" />
-                  成员 xxx
-                </div> */}
                 {isPostOrTimeline && (
                   <Tooltip
                     placement="bottom"
-                    title="我的主页"
+                    title={lang.myHomePage}
                     arrow
                     interactive
                     enterDelay={400}

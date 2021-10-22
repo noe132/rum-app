@@ -21,6 +21,7 @@ import useActiveGroupLatestStatus from 'store/selectors/useActiveGroupLatestStat
 import useActiveGroup from 'store/selectors/useActiveGroup';
 import { GROUP_TEMPLATE_TYPE } from 'utils/constant';
 import OpenForumObjectDetail from 'layouts/Main/Forum/OpenObjectDetail';
+import { lang } from 'utils/lang';
 
 interface IProps {
   open: boolean
@@ -65,15 +66,15 @@ const Notification = observer((props: IProps) => {
     //   unreadCount:
     //     unreadCountMap.notificationUnreadCommentLike
     //     + unreadCountMap.notificationUnreadObjectLike,
-    //   text: '点赞',
+    //   text: lang.like,
     // },
     {
       unreadCount: unreadCountMap.notificationUnreadCommentObject,
-      text: '评论',
+      text: lang.comment,
     },
     {
       unreadCount: unreadCountMap.notificationUnreadCommentReply,
-      text: '回复',
+      text: lang.reply,
     },
   ] as ITab[];
 
@@ -180,7 +181,7 @@ const Notification = observer((props: IProps) => {
               {state.tab === 2 && <LikeMessages />}
               {notifications.length === 0 && (
                 <div className="py-28 text-center text-14 text-gray-400 opacity-80">
-                  还没有收到消息 ~
+                  {lang.empty(lang.message)}
                 </div>
               )}
             </div>
@@ -204,7 +205,7 @@ const CommentMessages = observer((props: IProps) => {
         const comment = notification.object as CommentModel.IDbDerivedCommentItem | null;
 
         if (!comment) {
-          return 'comment 不存在';
+          return lang.notFound(lang.comment);
         }
 
         const showLastReadFlag = index < notifications.length - 1
@@ -235,8 +236,8 @@ const CommentMessages = observer((props: IProps) => {
                     </div>
                     <div className="ml-2 text-gray-9b text-12">
                       {comment.Content.threadTrxId || comment.Content.replyTrxId
-                        ? '回复了你的评论'
-                        : '评论了你的内容'}
+                        ? lang.replyYourComment
+                        : lang.replyYourContent}
                     </div>
                   </div>
                   <div className="mt-[9px] opacity-90">
@@ -272,7 +273,7 @@ const CommentMessages = observer((props: IProps) => {
                         }
                       }}
                     >
-                      点击查看
+                      {lang.open}
                       <GoChevronRight className="text-12 opacity-70 ml-[-1px]" />
                     </div>
                   </div>
@@ -280,7 +281,7 @@ const CommentMessages = observer((props: IProps) => {
               </div>
               {showLastReadFlag && (
                 <div className="w-full text-12 text-center pt-10 text-gray-400 ">
-                  上次看到这里
+                  {lang.lastReadHere}
                 </div>
               )}
             </div>
@@ -303,7 +304,7 @@ const LikeMessages = () => {
           | ObjectModel.IDbDerivedObjectItem;
 
         if (!object) {
-          return 'object 不存在';
+          return lang.notFound(lang.object);
         }
         const isObject = notification.Type === NotificationModel.NotificationType.objectLike;
         const showLastReadFlag = index < notifications.length - 1
@@ -333,7 +334,7 @@ const LikeMessages = () => {
                       {object.Extra.user.profile.name}
                     </div>
                     <div className="ml-2 text-gray-9b text-12">
-                      赞了你的{isObject ? '内容' : '评论'}
+                      {lang.likeFor(isObject ? lang.object : lang.comment)}
                     </div>
                   </div>
                   <div className="mt-3 border-l-[3px] border-gray-9b pl-[9px] text-12 text-gray-4a">
@@ -364,7 +365,7 @@ const LikeMessages = () => {
                         }
                       }}
                     >
-                      点击查看
+                      {lang.open}
                       <GoChevronRight className="text-12 opacity-70 ml-[-1px]" />
                     </div>
                   </div>
@@ -372,7 +373,7 @@ const LikeMessages = () => {
               </div>
               {showLastReadFlag && (
                 <div className="w-full text-12 text-center pt-10 text-gray-400">
-                  上次看到这里
+                  {lang.lastReadHere}
                 </div>
               )}
             </div>
