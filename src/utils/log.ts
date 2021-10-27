@@ -105,12 +105,11 @@ const saveNodeStoreData = () => {
   );
   const { nodeStore } = (window as any).store;
   console.log(pick(nodeStore, [
-    'apiHost',
-    'port',
+    'apiConfig',
+    'status',
     'info',
     'storagePath',
     'mode',
-    'canUseExternalMode',
     'network',
   ]));
 };
