@@ -28,6 +28,7 @@ export default observer(() => {
 
   const database = useDatabase();
   const isGroupOwner = useIsCurrentGroupOwner();
+  const latestStatus = latestStatusStore.map[activeGroupStore.id] || latestStatusStore.DEFAULT_LATEST_STATUS;
   const state = useLocalObservable(() => ({
     anchorEl: null,
     showGroupInfoModal: false,
@@ -60,7 +61,9 @@ export default observer(() => {
     try {
       const removedGroupId = activeGroupStore.id;
       await GroupApi.leaveGroup(removedGroupId);
-      await GroupApi.clearGroup(removedGroupId);
+      if (latestStatus.producerCount === 1 && isGroupOwner) {
+        await GroupApi.clearGroup(removedGroupId);
+      }
       await sleep(500);
       const sortedGroups = getSortedGroups(groupStore.groups, latestStatusStore.map);
       const firstExistsGroup = sortedGroups.filter(
@@ -81,6 +84,7 @@ export default observer(() => {
         message: lang.exited,
       });
     } catch (err) {
+      confirmDialogStore.setLoading(false);
       console.error(err);
       snackbarStore.show({
         message: lang.somethingWrong,
@@ -90,13 +94,9 @@ export default observer(() => {
   };
 
   const leaveGroup = () => {
-    const latestStatus = latestStatusStore.map[activeGroupStore.id] || latestStatusStore.DEFAULT_LATEST_STATUS;
     let confirmText = '';
-    if (latestStatus.producerCount === 1) {
-      confirmText = '你是本群组唯一的出块节点，你退出之后，群组将永久作废，也无法正常使用。';
-      if (isGroupOwner) {
-        confirmText += '<br /><br />如果退出之后，仍然想要群组能继续正常运行，你可以添加另外一个出块节点来承担出块的工作<br /><br />';
-      }
+    if (latestStatus.producerCount === 1 && isGroupOwner) {
+      confirmText = '你是本群组唯一的出块节点，你退出之后，群组将永久作废，也无法正常使用。<br /><br />如果退出之后，仍然想要群组能继续正常运行，你可以添加另外一个出块节点来承担出块的工作<br /><br />';
     }
     confirmText += lang.confirmToExit;
     confirmDialogStore.show({

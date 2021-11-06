@@ -20,7 +20,7 @@ interface IProps {
 }
 
 const AnnouncedProducers = observer((props: IProps) => {
-  const { activeGroupStore, snackbarStore, confirmDialogStore } = useStore();
+  const { activeGroupStore, snackbarStore, confirmDialogStore, groupStore } = useStore();
   const activeGroup = useActiveGroup();
   const database = useDatabase();
   const isGroupOwner = useIsCurrentGroupOwner();
@@ -41,8 +41,7 @@ const AnnouncedProducers = observer((props: IProps) => {
   const fetch = React.useCallback(async () => {
     state.loading = true;
     try {
-      const producers = await GroupApi.fetchAnnouncedProducers(activeGroupStore.id);
-      const announcedProducers = producers.filter((producer) => producer.Result === 'ANNOUNCED');
+      const announcedProducers = await fetchAnnouncedProducers(activeGroupStore.id);
       await Promise.all(announcedProducers.map(async (producer) => {
         const user = await PersonModel.getUser(database, {
           GroupId: activeGroupStore.id,
@@ -123,20 +122,29 @@ const AnnouncedProducers = observer((props: IProps) => {
             message: action === 'ADD' ? '已允许' : '已移除',
             duration: 1000,
           });
+          const announcedProducers = await fetchAnnouncedProducers(activeGroupStore.id);
+          groupStore.setHasAnnouncedProducersMap(activeGroupStore.id, announcedProducers.length > 0);
           await sleep(1200);
           confirmDialogStore.hide();
           await sleep(500);
-          const producers = state.producers.filter((producer) => producer.AnnouncedPubkey !== producerPubKey);
-          if (producers.length === 0) {
+          if (announcedProducers.length === 0) {
             props.onClose();
           } else {
-            state.producers = producers;
+            state.producers = announcedProducers;
           }
         }
       } catch (err) {
         console.error(err);
       }
     }, 1000) as any;
+  };
+
+  const fetchAnnouncedProducers = async (groupId: string) => {
+    const approvedProducers = await GroupApi.fetchApprovedProducers(groupId);
+    const approvedProducerPubKeys = approvedProducers.map((producer) => producer.ProducerPubkey);
+    const announcedProducersRes = await GroupApi.fetchAnnouncedProducers(groupId);
+    const announcedProducers = announcedProducersRes.filter((producer) => producer.Result === 'ANNOUNCED' && (producer.Action === 'ADD' || (producer.Action === 'REMOVE' && approvedProducerPubKeys.includes(producer.AnnouncedPubkey))));
+    return announcedProducers;
   };
 
   React.useEffect(() => () => {
@@ -165,7 +173,7 @@ const AnnouncedProducers = observer((props: IProps) => {
                   </div>
                 </div>
                 <div className="mt-2 opacity-90 leading-relaxed">
-                  {producer.Action === 'ADD' ? '我想成为出块节点' : '我不想再继续做出块节点'}，理由是：{producer.Action === 'ADD' ? '非常活跃，能够保证 24 小时稳定在线' : '最近比较忙，没办法保持在线'}
+                  {producer.Action === 'ADD' ? '我想成为出块节点' : '我不想再继续做出块节点'}{producer.Memo ? `，理由是：${producer.Memo}` : ''}
                 </div>
                 <div className="mt-3 flex items-center">
                   {!isGroupOwner && (

@@ -207,6 +207,7 @@ export interface IAnnouncedProducer {
   AnnouncedPubkey: string
   AnnouncerSign: string
   Result: 'ANNOUNCED' | 'APPROVED'
+  Memo: string
   TimeStamp: number
 }
 

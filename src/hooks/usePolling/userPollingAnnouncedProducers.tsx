@@ -39,9 +39,11 @@ export default (duration: number) => {
 
     async function fetchAnnouncedProducers(groupId: string) {
       try {
-        const producers = await GroupApi.fetchAnnouncedProducers(groupId);
-        const hasAnnouncedProducers = !!producers.find((producer) => producer.Result === 'ANNOUNCED');
-        groupStore.setHasAnnouncedProducersMap(groupId, hasAnnouncedProducers);
+        const approvedProducers = await GroupApi.fetchApprovedProducers(groupId);
+        const approvedProducerPubKeys = approvedProducers.map((producer) => producer.ProducerPubkey);
+        const announcedProducersRes = await GroupApi.fetchAnnouncedProducers(groupId);
+        const announcedProducers = announcedProducersRes.filter((producer) => producer.Result === 'ANNOUNCED' && (producer.Action === 'ADD' || (producer.Action === 'REMOVE' && approvedProducerPubKeys.includes(producer.AnnouncedPubkey))));
+        groupStore.setHasAnnouncedProducersMap(groupId, announcedProducers.length > 0);
       } catch (err) {
         console.error(err);
       }
