@@ -2,7 +2,7 @@ import React from 'react';
 import classNames from 'classnames';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react-lite';
-import { debounce } from 'lodash';
+import { debounce, sumBy } from 'lodash';
 import TextareaAutosize from 'react-textarea-autosize';
 import { Tooltip } from '@material-ui/core';
 import { BiSmile } from 'react-icons/bi';
@@ -307,6 +307,17 @@ const Editor = observer((props: IProps) => {
                   preview.id = uuidV4();
                   return preview;
                 }));
+                const curByteLength = sumBy(Object.values(state.imageMap), (image: PreviewItem) => Buffer.byteLength(image.url, 'utf8'));
+                const newByteLength = sumBy(images, (image: PreviewItem) => Buffer.byteLength(image.url, 'utf8'));
+                const byteLength = curByteLength + newByteLength;
+                if (byteLength > 250000) {
+                  snackbarStore.show({
+                    message: '图片的总体积不能超过 200 kb',
+                    type: 'error',
+                  });
+                  return;
+                }
+                console.log({ byteLength, images });
                 images.forEach((image, index) => {
                   state.cacheImageIdSet.add(images[index].id);
                   state.imageMap[images[index].id] = image;
