@@ -21,7 +21,8 @@ export default {
         canvas.width = width;
         canvas.height = height;
         canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.7));
+        const isBigSize = width > 500 || height > 500;
+        resolve(canvas.toDataURL('image/jpeg', isBigSize ? 0.55 : 0.7));
       };
       img.onerror = () => {
         resolve('');
