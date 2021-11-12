@@ -27,6 +27,7 @@ interface IProps {
   object: IDbDerivedObjectItem
   inObjectDetailModal?: boolean
   selectedCommentOptions?: ISelectedCommentOptions
+  showInTop?: boolean
 }
 
 export default observer((props: IProps) => {
@@ -70,6 +71,15 @@ export default observer((props: IProps) => {
           disabledHighlight: selectedCommentOptions.disabledHighlight,
           inObjectDetailModal: true,
         });
+      } else if (props.showInTop) {
+        await sleep(10);
+        const commentsArea = document.querySelector(`#comment-section`);
+        if (commentsArea) {
+          commentsArea.scrollIntoView({
+            block: 'start',
+            behavior: 'smooth',
+          });
+        }
       }
     })();
   }, [state.order]);
