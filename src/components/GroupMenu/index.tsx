@@ -11,9 +11,11 @@ import GroupApi from 'apis/group';
 import sleep from 'utils/sleep';
 import { runInAction } from 'mobx';
 import useDatabase from 'hooks/useDatabase';
+import useOffChainDatabase from 'hooks/useOffChainDatabase';
 import getSortedGroups from 'store/selectors/getSortedGroups';
 import { lang } from 'utils/lang';
 import useIsCurrentGroupOwner from 'store/selectors/useIsCurrentGroupOwner';
+import removeGroupData from 'utils/removeGroupData';
 
 export default observer(() => {
   const {
@@ -27,6 +29,7 @@ export default observer(() => {
   } = useStore();
 
   const database = useDatabase();
+  const offChainDatabase = useOffChainDatabase();
   const isGroupOwner = useIsCurrentGroupOwner();
   const latestStatus = latestStatusStore.map[activeGroupStore.id] || latestStatusStore.DEFAULT_LATEST_STATUS;
   const state = useLocalObservable(() => ({
@@ -74,7 +77,7 @@ export default observer(() => {
         groupStore.deleteGroup(removedGroupId);
         seedStore.deleteSeed(nodeStore.storagePath, removedGroupId);
       });
-      await latestStatusStore.remove(database, removedGroupId);
+      await removeGroupData([database, offChainDatabase], removedGroupId);
       confirmDialogStore.setLoading(false);
       confirmDialogStore.hide();
       await sleep(300);
@@ -128,7 +131,7 @@ export default observer(() => {
           autoFocus={false}
           PaperProps={{
             style: {
-              width: 110,
+              width: 150,
               margin: '27px 0 0 20px',
             },
           }}
@@ -156,7 +159,7 @@ export default observer(() => {
               <span className="flex items-center mr-3">
                 <FiDelete className="text-16 opacity-50" />
               </span>
-              <span className="font-bold">{lang.exit}</span>
+              <span className="font-bold">{lang.exitGroup}</span>
             </div>
           </MenuItem>
         </Menu>
