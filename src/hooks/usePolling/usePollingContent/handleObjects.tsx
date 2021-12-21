@@ -44,7 +44,7 @@ export default async (options: IOptions) => {
         });
 
         // save
-        const objectsToAdd: Array<ObjectModel.IDbObjectItem> = [];
+        const objectsToAdd: Array<ObjectModel.IDbObjectItemPayload> = [];
         const objectIdsToMarkAsynced: Array<number> = [];
         items.filter((v) => !v.existObject).forEach(({ object }) => {
           objectsToAdd.push({

@@ -5,11 +5,17 @@ import * as SummaryModel from 'hooks/useDatabase/models/summary';
 import { bulkGetLikeStatus } from 'hooks/useDatabase/models/likeStatus';
 import { INoteItem } from 'apis/content';
 import { keyBy } from 'lodash';
+import Dexie from 'dexie';
 
-export interface IDbObjectItem extends INoteItem, IDbExtra {
-  commentCount?: number
-  likeCount?: number
-  dislikeCount?: number
+export interface IDbObjectItemPayload extends INoteItem, IDbExtra {}
+
+export interface IDbObjectItem extends IDbObjectItemPayload {
+  Summary: {
+    hotCount: number
+    commentCount: number
+    likeCount: number
+    dislikeCount: number
+  }
 }
 
 export interface IDbDerivedObjectItem extends IDbObjectItem {
@@ -20,13 +26,27 @@ export interface IDbDerivedObjectItem extends IDbObjectItem {
   }
 }
 
-export const create = async (db: Database, object: IDbObjectItem) => {
-  await db.objects.add(object);
+export const DEFAULT_SUMMARY = {
+  hotCount: 0,
+  commentCount: 0,
+  likeCount: 0,
+  dislikeCount: 0,
+};
+
+export const create = async (db: Database, object: IDbObjectItemPayload) => {
+  await db.objects.add({
+    ...object,
+    Summary: DEFAULT_SUMMARY,
+  });
   await syncSummary(db, object.GroupId, object.Publisher);
 };
 
-export const bulkCreate = async (db: Database, objects: Array<IDbObjectItem>) => {
-  await db.objects.bulkAdd(objects);
+export const bulkCreate = async (db: Database, objects: Array<IDbObjectItemPayload>) => {
+  const _objects = objects.map((object) => ({
+    ...object,
+    Summary: DEFAULT_SUMMARY,
+  }));
+  await db.objects.bulkAdd(_objects);
   const set = new Set<string>();
   const objectsNeedToSync = objects.filter((v) => {
     const id = `${v.GroupId}-${v.Publisher}`;
@@ -67,12 +87,24 @@ export interface IListOptions {
   publisherSet?: Set<string>
   excludedPublisherSet?: Set<string>
   searchText?: string
+  order?: Order
+}
+
+export enum Order {
+  desc,
+  hot,
 }
 
 export const list = async (db: Database, options: IListOptions) => {
-  let collection = db.objects.where({
-    GroupId: options.GroupId,
-  });
+  let collection: Dexie.Collection;
+
+  if (options.order === Order.hot) {
+    collection = db.objects.where('[GroupId+Summary.hotCount]').between([options.GroupId, Dexie.minKey], [options.GroupId, Dexie.maxKey]);
+  } else {
+    collection = db.objects.where({
+      GroupId: options.GroupId,
+    });
+  }
 
   if (
     options.TimeStamp
@@ -101,11 +133,12 @@ export const list = async (db: Database, options: IListOptions) => {
     'r',
     [db.persons, db.summary, db.objects, db.likes],
     async () => {
-      const objects = await collection
+      collection = collection
         .reverse()
         .offset(0)
-        .limit(options.limit)
-        .sortBy('TimeStamp');
+        .limit(options.limit);
+
+      const objects = options.order === Order.hot ? await collection.toArray() : await collection.sortBy('TimeStamp');
 
       if (objects.length === 0) {
         return [];

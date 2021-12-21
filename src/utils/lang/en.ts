@@ -269,8 +269,6 @@ export const content = {
   latestForumPost: 'Latest Posts',
   createForumPost: 'Create a post',
   createFirstForumPost: 'Publish your first post',
-  sortByHot: 'By Popularity',
-  sortByDate: 'By Date',
   latest: 'Latest',
   hot: 'Hot',
   publishYourComment: 'Submit your comment...',

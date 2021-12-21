@@ -269,8 +269,6 @@ export const content = {
   latestForumPost: '最新帖子',
   createForumPost: '发帖',
   createFirstForumPost: '发布第一个帖子',
-  sortByHot: '按热度',
-  sortByDate: '按时间',
   latest: '最新',
   hot: '热门',
   publishYourComment: '发布你的评论 ...',

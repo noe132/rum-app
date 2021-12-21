@@ -86,10 +86,10 @@ export default async (options: IOptions) => {
           const target = activeGroupStore.objectMap[like.Content.objectTrxId] || commentStore.map[like.Content.objectTrxId] || activeGroupStore.getCachedObject(groupId, like.Content.objectTrxId);
           if (target) {
             if (like.Content.type === LikeType.Like) {
-              target.likeCount = (target.likeCount || 0) + 1;
+              target.Summary.likeCount = (target.Summary.likeCount || 0) + 1;
               target.Extra.likedCount = isMyself ? (target.Extra.likedCount || 0) + 1 : 0;
             } else {
-              target.dislikeCount = (target.dislikeCount || 0) + 1;
+              target.Summary.dislikeCount = (target.Summary.dislikeCount || 0) + 1;
               target.Extra.dislikedCount = isMyself ? (target.Extra.dislikedCount || 0) + 1 : 0;
             }
           }

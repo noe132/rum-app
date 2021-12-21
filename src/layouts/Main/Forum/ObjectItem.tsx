@@ -54,8 +54,8 @@ export default observer((props: IProps) => {
   const submitLike = useSubmitLike();
   const liked = (object.Extra.likedCount || 0) > 0;
   const disliked = (object.Extra.dislikedCount || 0) > 0;
-  const likeCount = object.likeCount || 0;
-  const dislikeCount = object.dislikeCount || 0;
+  const likeCount = object.Summary.likeCount || 0;
+  const dislikeCount = object.Summary.dislikeCount || 0;
 
   // replace link and search text
   React.useEffect(() => {
@@ -131,7 +131,7 @@ export default observer((props: IProps) => {
               });
             }}
           >
-            <div className="text-16 opacity-90">
+            <div className="text-16 opacity-70">
               {liked ? (
                 <RiThumbUpFill className="text-black opacity-60" />
               ) : (
@@ -149,7 +149,7 @@ export default observer((props: IProps) => {
                 'text-gray-33': disliked,
                 'cursor-pointer': !disliked,
               },
-              'flex items-center tracking-wide text-gray-33 leading-none mt-[18px]',
+              'flex items-center tracking-wide text-gray-33 leading-none mt-[13px]',
             )}
             onClick={() => {
               if (disliked) {
@@ -161,7 +161,7 @@ export default observer((props: IProps) => {
               });
             }}
           >
-            <div className="text-16 opacity-90">
+            <div className="text-16 opacity-70">
               {disliked ? (
                 <RiThumbDownFill className="text-black opacity-60" />
               ) : (
@@ -217,7 +217,7 @@ export default observer((props: IProps) => {
               </div>
             </div>
             {
-              !!object.commentCount && (
+              !!object.Summary.commentCount && (
                 <div
                   className="flex-grow flex items-center justify-end cursor-pointer"
                   onClick={() => {
@@ -228,7 +228,7 @@ export default observer((props: IProps) => {
                   }}
                 >
                   <img className="text-gray-6f mr-2" src={`${assetsBasePath}/reply.svg`} alt="" />
-                  <span className="text-gray-6f text-16 mt-[-1px]">{object.commentCount}</span>
+                  <span className="text-gray-6f text-16 mt-[-1px]">{object.Summary.commentCount}</span>
                 </div>
               )
             }

@@ -34,7 +34,7 @@ export default observer((props: IProps) => {
   const profile = profileMap[object.Publisher] || object.Extra.user.profile;
   const isMySelf = activeGroup.user_pubkey === object.Extra.user.publisher;
   const liked = (object.Extra.likedCount || 0) > (object.Extra.dislikedCount || 0);
-  const likeCount = (object.likeCount || 0) - (object.dislikeCount || 0);
+  const likeCount = (object.Summary.likeCount || 0) - (object.Summary.dislikeCount || 0);
   const submitLike = useSubmitLike();
 
   return (
@@ -71,8 +71,8 @@ export default observer((props: IProps) => {
               <FaRegComment />
             )}
           </div>
-          {object.commentCount ? (
-            <span className="mr-1">{object.commentCount}</span>
+          {object.Summary.commentCount ? (
+            <span className="mr-1">{object.Summary.commentCount}</span>
           )
             : '评论'}
         </div>

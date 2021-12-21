@@ -46,7 +46,7 @@ export default observer((props: IProps) => {
   }_${comment.TrxId}`;
   const highlight = domElementId === commentStore.highlightDomElementId;
   const liked = (comment.Extra.likedCount || 0) > (comment.Extra.dislikedCount || 0);
-  const likeCount = (comment.likeCount || 0) - (comment.dislikeCount || 0);
+  const likeCount = (comment.Summary.likeCount || 0) - (comment.Summary.dislikeCount || 0);
 
   const submitLike = useSubmitLike();
 
