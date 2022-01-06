@@ -1,34 +1,27 @@
 import React from 'react';
 import { unmountComponentAtNode, render } from 'react-dom';
-import classNames from 'classnames';
-import { action, reaction, runInAction } from 'mobx';
+// import classNames from 'classnames';
+import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react-lite';
 import {
   Fade,
-  FormControl,
-  InputLabel,
-  OutlinedInput,
-  Radio,
   TextField,
 } from '@material-ui/core';
 
-import GroupApi from 'apis/group';
+import { IGroup } from 'apis/group';
 // import Button from 'components/Button';
-import sleep from 'utils/sleep';
-import { GROUP_TEMPLATE_TYPE } from 'utils/constant';
 import { ThemeRoot } from 'utils/theme';
 import { StoreProvider, useStore } from 'store';
-import useFetchGroups from 'hooks/useFetchGroups';
-import TimelineIcon from 'assets/template/template_icon_timeline.svg?react';
-import PostIcon from 'assets/template/template_icon_post.svg?react';
-import NotebookIcon from 'assets/template/template_icon_notebook.svg?react';
 import { lang } from 'utils/lang';
 import { assetsBasePath } from 'utils/env';
 import { joinGroup } from 'standaloneModals/joinGroup';
 import { createGroup } from 'standaloneModals/createGroup';
 import { IoSearch } from 'react-icons/io5';
-import Selector from './selector';
-
+import Filter from './filter';
+import Order from './order';
+import { RiCheckboxBlankLine, RiCheckboxFill, RiCheckboxIndeterminateLine, RiCheckboxBlankFill } from 'react-icons/ri';
+import { GROUP_TEMPLATE_TYPE, GROUP_TEMPLATE_TYPE_NAME, GROUP_TEMPLATE_TYPE_ICON } from 'utils/constant';
+import { format } from 'date-fns';
 
 export const myGroup = async () => new Promise<void>((rs) => {
   const div = document.createElement('div');
@@ -61,102 +54,62 @@ interface Props {
 const MyGroup = observer((props: Props) => {
   const state = useLocalObservable(() => ({
     open: false,
-    step: 0,
-
-    type: GROUP_TEMPLATE_TYPE.TIMELINE,
-    name: '',
-    desc: '',
-    consensusType: 'poa',
-    encryptionType: 'public',
-
+    groups: [] as any[],
     keyword: '',
-    seedNetType: 'all',
-
-    creating: false,
+    seedNetType: [] as any,
+    seedNetAllType: [] as any,
+    createTimeOrder: '',
+    walletOrder: '',
+    selected: [] as string[],
   }));
+
   const {
-    snackbarStore,
-    seedStore,
-    nodeStore,
-    activeGroupStore,
+    groupStore,
   } = useStore();
-  const fetchGroups = useFetchGroups();
+
   const scrollBox = React.useRef<HTMLDivElement>(null);
 
-  const handleTypeChange = action((type: GROUP_TEMPLATE_TYPE) => {
-    state.type = type;
+  const handleSelect = action((value: string) => {
+    if (state.selected.includes(value)) {
+      state.selected = state.selected.filter((item: string) => item !== value);
+    } else {
+      state.selected = [...state.selected, value];
+    }
   });
 
-  const handleConfirm = async () => {
-    if (!state.name) {
-      snackbarStore.show({
-        message: lang.require(lang.groupName),
-        type: 'error',
-      });
-      return;
+  const handleSelectAll = action(() => {
+    if (state.selected.length !== state.groups.length) {
+      state.selected = state.groups.map((group) => group.group_id);
+    } else {
+      state.selected = [];
     }
-
-    if (state.creating) {
-      return;
-    }
-
-    runInAction(() => { state.creating = true; });
-
-    try {
-      const group = await GroupApi.createGroup({
-        groupName: state.name,
-        consensusType: state.consensusType,
-        encryptionType: state.type === GROUP_TEMPLATE_TYPE.NOTE ? 'private' : state.encryptionType,
-        groupType: state.type,
-      });
-      await sleep(300);
-      await fetchGroups();
-      await sleep(300);
-      seedStore.addSeed(nodeStore.storagePath, group.group_id, group);
-      activeGroupStore.setId(group.group_id);
-      await sleep(200);
-      snackbarStore.show({
-        message: lang.created,
-      });
-      handleClose();
-      sleep(500).then(() => {
-        runInAction(() => { state.creating = false; });
-      });
-    } catch (err) {
-      console.error(err);
-      runInAction(() => { state.creating = false; });
-      snackbarStore.show({
-        message: lang.somethingWrong,
-        type: 'error',
-      });
-    }
-  };
+  });
 
   const handleClose = action(() => {
     props.rs();
     state.open = false;
   });
 
-  React.useEffect(() => reaction(
-    () => state.step,
-    () => {
-      if (scrollBox.current) {
-        scrollBox.current.scrollTop = 0;
-      }
-    },
-  ), []);
+  React.useEffect(action(() => {
+    let groups = groupStore.groups.filter((group) => state.seedNetType.includes(group.app_key));
+    if (state.keyword) {
+      groups = groups.filter((group) => group.group_name.includes(state.keyword));
+    }
+    if (state.createTimeOrder === 'asc') {
+      groups = groups.sort((a, b) => a.last_updated - b.last_updated);
+    }
+    if (state.createTimeOrder === 'desc') {
+      groups = groups.sort((a, b) => b.last_updated - a.last_updated);
+    }
+    state.groups = groups;
+    state.selected = state.selected.filter((id) => groups.map((group) => group.group_id).includes(id));
+  }), [state, state.createTimeOrder, state.seedNetType, state.keyword]);
 
   React.useEffect(action(() => {
     state.open = true;
+    state.seedNetAllType = [...new Set(groupStore.groups.map((group) => group.app_key))];
+    state.seedNetType = [...new Set(groupStore.groups.map((group) => group.app_key))];
   }), []);
-
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      (e.target as HTMLInputElement).blur();
-      handleConfirm();
-    }
-  };
 
   return (
     <Fade
@@ -216,15 +169,33 @@ const MyGroup = observer((props: Props) => {
           <div className="w-[960px] mt-[22px] mb-[11px] flex items-center gap-x-[30px]">
             <div className="flex items-center">
               <div className="text-gray-af text-12 scale-[0.85]">{lang.seedNet}</div>
-              <Selector />
+              <Filter
+                options={state.seedNetAllType.map((type: string) => (
+                  { name: GROUP_TEMPLATE_TYPE_NAME[type as GROUP_TEMPLATE_TYPE], value: type }
+                ))}
+                selected={state.seedNetType}
+                onFilter={(values) => { state.seedNetType = values; }}
+              />
             </div>
             <div className="flex items-center">
               <div className="text-gray-af text-12 scale-[0.85]">{lang.seedNet}</div>
-              <Selector />
+              <Filter
+                options={state.seedNetAllType.map((type: string) => (
+                  { name: GROUP_TEMPLATE_TYPE_NAME[type as GROUP_TEMPLATE_TYPE], value: type }
+                ))}
+                selected={state.seedNetType}
+                onFilter={(values) => { state.seedNetType = values; }}
+              />
             </div>
             <div className="flex items-center">
               <div className="text-gray-af text-12 scale-[0.85]">{lang.seedNet}</div>
-              <Selector />
+              <Filter
+                options={state.seedNetAllType.map((type: string) => (
+                  { name: GROUP_TEMPLATE_TYPE_NAME[type as GROUP_TEMPLATE_TYPE], value: type }
+                ))}
+                selected={state.seedNetType}
+                onFilter={(values) => { state.seedNetType = values; }}
+              />
             </div>
             <div className="text-producer-blue text-12 scale-[0.85]">清空选择</div>
             <div className="flex-grow flex items-center flex-row-reverse">
@@ -250,87 +221,94 @@ const MyGroup = observer((props: Props) => {
                 </div>
               </div>
             </div>
-
           </div>
-          <div className="w-[960px] flex-1 text-gray-6d mb-8 px-10 pb-6 bg-white">
-            {state.step === 0 && (<>
-              <div className="text-18 font-medium">
-                {lang.createGroup} - {lang.chooseTemplate}
-              </div>
 
-              <div className="mt-3 text-12 text-gray-9c">
-                {lang.groupTypeDesc}
-              </div>
+          <div className="w-[960px] h-[41px] px-5 flex items-center bg-black text-14 text-gray-f2 rounded-t-md">
+            <div
+              className="flex items-center w-[86px]"
+              onClick={handleSelectAll}
+            >
+              {
+                state.selected.length === state.groups.length && state.selected.length !== 0 && <RiCheckboxFill className="text-16 text-producer-blue cursor-pointer" />
+              }
+              {
+                state.selected.length === 0 && <RiCheckboxBlankFill className="text-16 text-white cursor-pointer" />
+              }
+              {
+                state.selected.length > 0 && state.selected.length < state.groups.length && <RiCheckboxIndeterminateLine className="text-16 text-producer-blue cursor-pointer" />
+              }
+            </div>
+            <div className="flex flex-1 items-center">
+              <span>{lang.createTime}</span>
+              <Order
+                className="text-20"
+                order={state.createTimeOrder}
+                onClick={(order: string) => { state.createTimeOrder = order; }}
+              />
+            </div>
+            <div className="flex items-center w-[203px]">
+              <span>{lang.bindWallet}</span>
+              <Order
+                className="text-20"
+                order={state.walletOrder}
+                onClick={(order: string) => { state.walletOrder = order; }}
+              />
+            </div>
+          </div>
 
-              <div className="flex justify-center gap-x-20 mt-16 mb-6">
-                {([
-                  [lang.sns, GROUP_TEMPLATE_TYPE.TIMELINE, TimelineIcon],
-                  [lang.forum, GROUP_TEMPLATE_TYPE.POST, PostIcon],
-                  [lang.note, GROUP_TEMPLATE_TYPE.NOTE, NotebookIcon],
-                ] as const).map(([name, type, GroupIcon], i) => (
-                  <div
-                    className={classNames(
-                      'flex flex-col items-center select-none cursor-pointer px-4',
-                      // type === 'post' && 'pointer-events-none opacity-60',
-                    )}
-                    onClick={() => handleTypeChange(type)}
-                    key={i}
-                  >
-                    <div className="relative">
-                      &nbsp;
-                      <div className="absolute text-black whitespace-nowrap text-16 left-1/2 -translate-x-1/2 top-0">
-                        {name}
-                      </div>
+          <div className="w-[960px] flex-1text-gray-6d mb-8 bg-white">
+            {
+              state.groups.map((group: IGroup) => (
+                <div key={group.group_id} className="px-5 h-[88px] flex items-center border-t border-gray-fa">
+                  <div className="flex items-center w-[86px]">
+                    <div onClick={() => handleSelect(group.group_id)}>
+                      {
+                        state.selected.includes(group.group_id)
+                          ? <RiCheckboxFill className="text-16 text-producer-blue cursor-pointer" />
+                          : <RiCheckboxBlankLine className="text-16 text-gray-af cursor-pointer" />
+                      }
                     </div>
-                    <div className="mt-2 h-14 flex flex-center">
-                      <GroupIcon
-                        className="w-14 text-black"
-                        style={{
-                          strokeWidth: 2,
-                        }}
-                      />
+                    <div className="ml-3 w-10 h-10 flex items-baseline justify-center text-28 text-gray-4a border border-gray-f2">{group.group_name ? group.group_name.trim()[0] : ' '}</div>
+                  </div>
+                  <div className="flex-1 self-stretch pt-4 pb-3 flex flex-col justify-between">
+                    <div className="text-16 text-black font-bold flex">
+                      {group.group_name}
+                      {((app_key) => {
+                        const GroupIcon = GROUP_TEMPLATE_TYPE_ICON[app_key];
+                        return (
+                          <GroupIcon
+                            className="text-gray-af ml-1"
+                            style={{ strokeWidth: 4 }}
+                            width="20"
+                          />
+                        );
+                      })(group.app_key) }
                     </div>
-                    <div className="text-16 flex items-center">
-                      <Radio
-                        disableRipple
-                        color="primary"
-                        size="small"
-                        checked={state.type === type}
-                      />
+                    <div className="text-12 text-gray-9c">
+                      {`创建于 ${format(group.last_updated / 1000000, 'yyyy/MM/dd')}`}
                     </div>
                   </div>
-                ))}
-              </div>
-
-              <div className="text-14 px-5">
-                {state.type === GROUP_TEMPLATE_TYPE.TIMELINE && (
-                  <div className="animate-fade-in text-center">
-                    {lang.snsDesc}
+                  <div className="flex items-center w-[236px]">
+                    <Filter
+                      options={state.seedNetAllType.map((type: string) => (
+                        { name: GROUP_TEMPLATE_TYPE_NAME[type as GROUP_TEMPLATE_TYPE], value: type }
+                      ))}
+                      selected={state.seedNetType}
+                      onFilter={(values) => { state.seedNetType = values; }}
+                    />
                   </div>
-                )}
-                {state.type === GROUP_TEMPLATE_TYPE.POST && (
-                  <div className="animate-fade-in text-center">
-                    {lang.forumDesc}
+                  <div className="flex items-center w-[203px]">
+                    <Filter
+                      options={state.seedNetAllType.map((type: string) => (
+                        { name: GROUP_TEMPLATE_TYPE_NAME[type as GROUP_TEMPLATE_TYPE], value: type }
+                      ))}
+                      selected={state.seedNetType}
+                      onFilter={(values) => { state.seedNetType = values; }}
+                    />
                   </div>
-                )}
-                {state.type === GROUP_TEMPLATE_TYPE.NOTE && (
-                  <div className="animate-fade-in text-center">
-                    {lang.noteDesc}
-                  </div>
-                )}
-              </div>
-
-              <FormControl className="mt-8 w-full" variant="outlined">
-                <InputLabel>{lang.groupName}</InputLabel>
-                <OutlinedInput
-                  label={lang.groupName}
-                  value={state.name}
-                  onChange={action((e) => { state.name = e.target.value; })}
-                  spellCheck={false}
-                  onKeyDown={handleInputKeyDown}
-                />
-              </FormControl>
-            </>)}
+                </div>
+              ))
+            }
           </div>
         </div>
         <style jsx>{`

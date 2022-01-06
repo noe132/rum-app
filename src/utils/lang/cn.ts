@@ -135,6 +135,7 @@ export const content = {
   nickname: '昵称',
   connectMixinForTip: '连接 Mixin 钱包，用于接收打赏',
   connectWallet: '连接钱包',
+  bindWallet: '钱包绑定',
   connectedMixinId: (id: string) => `已连接 Mixin 钱包，地址是 ${id}`,
   beBannedTip: '管理员已禁止你发布内容',
   beBannedTip2: '你被禁止发言了，需要管理员解禁才能发言和查看新内容',
@@ -378,6 +379,10 @@ export const content = {
   thumbDown: '踩',
   myGroup: '我的种子网络',
   searchSeedNets: '搜索种子网络',
+  joinTime: '加入时间',
+  createTime: '创建时间',
+  selectAll: '全选',
+  selectReverse: '反选',
 };
 
 export type Content = typeof content;
