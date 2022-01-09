@@ -394,4 +394,10 @@ export const content = {
   selectReverse: 'Select Reverse',
   announcement: 'announcement',
   openImage: 'open image',
+  nodeRole: 'Node Role',
+  ownerRole: 'Owner',
+  noneRole: 'None Role',
+  allRole: 'All Role',
+  selected: 'Selected',
+  option: 'option',
 };

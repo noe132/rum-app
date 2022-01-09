@@ -394,6 +394,12 @@ export const content = {
   selectReverse: '反选',
   announcement: '公告',
   openImage: '查看图片',
+  nodeRole: '节点角色',
+  ownerRole: '创建者',
+  noneRole: '没有角色',
+  allRole: '全部角色',
+  selected: '选中',
+  option: '项',
 };
 
 export type Content = typeof content;

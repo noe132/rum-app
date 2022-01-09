@@ -11,17 +11,28 @@ import {
 import { IGroup } from 'apis/group';
 // import Button from 'components/Button';
 import { ThemeRoot } from 'utils/theme';
-import { StoreProvider, useStore } from 'store';
+import { StoreProvider } from 'store';
 import { lang } from 'utils/lang';
 import { assetsBasePath } from 'utils/env';
 import { joinGroup } from 'standaloneModals/joinGroup';
 import { createGroup } from 'standaloneModals/createGroup';
 import { IoSearch } from 'react-icons/io5';
-import Filter from './filter';
-import Order from './order';
-import { RiCheckboxBlankLine, RiCheckboxFill, RiCheckboxIndeterminateLine, RiCheckboxBlankFill } from 'react-icons/ri';
+import {
+  RiCheckboxBlankLine,
+  RiCheckboxFill,
+  RiCheckboxIndeterminateLine,
+  RiCheckboxBlankFill,
+} from 'react-icons/ri';
 import { GROUP_TEMPLATE_TYPE, GROUP_TEMPLATE_TYPE_NAME, GROUP_TEMPLATE_TYPE_ICON } from 'utils/constant';
 import { format } from 'date-fns';
+import Filter from './filter';
+import Order from './order';
+import groupSelector from './groupSelector';
+
+const GROUP_ROLE_NAME: any = {
+  'owner': <div className="flex items-center"><div className="mr-1 w-[3px] h-[14px] bg-link-blue rounded" /><span>{lang.ownerRole}</span></div>,
+  'user': lang.noneRole,
+};
 
 export const myGroup = async () => new Promise<void>((rs) => {
   const div = document.createElement('div');
@@ -54,18 +65,18 @@ interface Props {
 const MyGroup = observer((props: Props) => {
   const state = useLocalObservable(() => ({
     open: false,
-    groups: [] as any[],
+    localGroups: [] as any[],
     keyword: '',
-    seedNetType: [] as any,
+    seedNetFilterType: [] as any,
     seedNetAllType: [] as any,
+    roleFilterType: [] as any,
+    roleAllType: [] as any,
     createTimeOrder: '',
     walletOrder: '',
     selected: [] as string[],
   }));
 
-  const {
-    groupStore,
-  } = useStore();
+  const groups = groupSelector();
 
   const scrollBox = React.useRef<HTMLDivElement>(null);
 
@@ -78,8 +89,8 @@ const MyGroup = observer((props: Props) => {
   });
 
   const handleSelectAll = action(() => {
-    if (state.selected.length !== state.groups.length) {
-      state.selected = state.groups.map((group) => group.group_id);
+    if (state.selected.length !== state.localGroups.length) {
+      state.selected = state.localGroups.map((group) => group.group_id);
     } else {
       state.selected = [];
     }
@@ -91,24 +102,26 @@ const MyGroup = observer((props: Props) => {
   });
 
   React.useEffect(action(() => {
-    let groups = groupStore.groups.filter((group) => state.seedNetType.includes(group.app_key));
+    let newGroups = groups.filter((group) => state.seedNetFilterType.includes(group.app_key) && state.roleFilterType.includes(group.role));
     if (state.keyword) {
-      groups = groups.filter((group) => group.group_name.includes(state.keyword));
+      newGroups = newGroups.filter((group) => group.group_name.includes(state.keyword));
     }
     if (state.createTimeOrder === 'asc') {
-      groups = groups.sort((a, b) => a.last_updated - b.last_updated);
+      newGroups = newGroups.sort((a, b) => a.last_updated - b.last_updated);
     }
     if (state.createTimeOrder === 'desc') {
-      groups = groups.sort((a, b) => b.last_updated - a.last_updated);
+      newGroups = newGroups.sort((a, b) => b.last_updated - a.last_updated);
     }
-    state.groups = groups;
+    state.localGroups = newGroups;
     state.selected = state.selected.filter((id) => groups.map((group) => group.group_id).includes(id));
-  }), [state, state.createTimeOrder, state.seedNetType, state.keyword]);
+  }), [state, state.createTimeOrder, state.seedNetFilterType, state.roleFilterType, state.keyword]);
 
   React.useEffect(action(() => {
     state.open = true;
-    state.seedNetAllType = [...new Set(groupStore.groups.map((group) => group.app_key))];
-    state.seedNetType = [...new Set(groupStore.groups.map((group) => group.app_key))];
+    state.seedNetAllType = [...new Set(groups.map((group) => group.app_key))];
+    state.seedNetFilterType = [...new Set(groups.map((group) => group.app_key))];
+    state.roleAllType = [...new Set(groups.map((group) => group.role))];
+    state.roleFilterType = [...new Set(groups.map((group) => group.role))];
   }), []);
 
   return (
@@ -170,11 +183,23 @@ const MyGroup = observer((props: Props) => {
             <div className="flex items-center">
               <div className="text-gray-af text-12 scale-[0.85]">{lang.seedNet}</div>
               <Filter
+                allText={lang.allType}
                 options={state.seedNetAllType.map((type: string) => (
                   { name: GROUP_TEMPLATE_TYPE_NAME[type as GROUP_TEMPLATE_TYPE], value: type }
                 ))}
-                selected={state.seedNetType}
-                onFilter={(values) => { state.seedNetType = values; }}
+                selected={state.seedNetFilterType}
+                onFilter={(values) => { state.seedNetFilterType = values; }}
+              />
+            </div>
+            <div className="flex items-center">
+              <div className="text-gray-af text-12 scale-[0.85]">{lang.nodeRole}</div>
+              <Filter
+                allText={lang.allRole}
+                options={state.roleAllType.map((role: string) => (
+                  { name: GROUP_ROLE_NAME[role], value: role }
+                ))}
+                selected={state.roleFilterType}
+                onFilter={(values) => { state.roleFilterType = values; }}
               />
             </div>
             <div className="flex items-center">
@@ -183,18 +208,8 @@ const MyGroup = observer((props: Props) => {
                 options={state.seedNetAllType.map((type: string) => (
                   { name: GROUP_TEMPLATE_TYPE_NAME[type as GROUP_TEMPLATE_TYPE], value: type }
                 ))}
-                selected={state.seedNetType}
-                onFilter={(values) => { state.seedNetType = values; }}
-              />
-            </div>
-            <div className="flex items-center">
-              <div className="text-gray-af text-12 scale-[0.85]">{lang.seedNet}</div>
-              <Filter
-                options={state.seedNetAllType.map((type: string) => (
-                  { name: GROUP_TEMPLATE_TYPE_NAME[type as GROUP_TEMPLATE_TYPE], value: type }
-                ))}
-                selected={state.seedNetType}
-                onFilter={(values) => { state.seedNetType = values; }}
+                selected={state.seedNetFilterType}
+                onFilter={(values) => { state.seedNetFilterType = values; }}
               />
             </div>
             <div className="text-producer-blue text-12 scale-[0.85]">清空选择</div>
@@ -229,13 +244,13 @@ const MyGroup = observer((props: Props) => {
               onClick={handleSelectAll}
             >
               {
-                state.selected.length === state.groups.length && state.selected.length !== 0 && <RiCheckboxFill className="text-16 text-producer-blue cursor-pointer" />
+                state.selected.length === state.localGroups.length && state.selected.length !== 0 && <RiCheckboxFill className="text-16 text-producer-blue cursor-pointer" />
               }
               {
                 state.selected.length === 0 && <RiCheckboxBlankFill className="text-16 text-white cursor-pointer" />
               }
               {
-                state.selected.length > 0 && state.selected.length < state.groups.length && <RiCheckboxIndeterminateLine className="text-16 text-producer-blue cursor-pointer" />
+                state.selected.length > 0 && state.selected.length < state.localGroups.length && <RiCheckboxIndeterminateLine className="text-16 text-producer-blue cursor-pointer" />
               }
             </div>
             <div className="flex flex-1 items-center">
@@ -258,7 +273,7 @@ const MyGroup = observer((props: Props) => {
 
           <div className="w-[960px] flex-1text-gray-6d mb-8 bg-white">
             {
-              state.groups.map((group: IGroup) => (
+              state.localGroups.map((group: IGroup & { role?: string }) => (
                 <div key={group.group_id} className="px-5 h-[88px] flex items-center border-t border-gray-fa">
                   <div className="flex items-center w-[86px]">
                     <div onClick={() => handleSelect(group.group_id)}>
@@ -284,8 +299,9 @@ const MyGroup = observer((props: Props) => {
                         );
                       })(group.app_key) }
                     </div>
-                    <div className="text-12 text-gray-9c">
-                      {`创建于 ${format(group.last_updated / 1000000, 'yyyy/MM/dd')}`}
+                    <div className="flex items-center text-12 text-gray-9c">
+                      <span>{`创建于 ${format(group.last_updated / 1000000, 'yyyy/MM/dd')}`}</span>
+                      {group.role === 'owner' && <div className="flex items-center ml-3"><span>{`${lang.nodeRole} : `}</span><div className="ml-2 mr-1 w-[3px] h-[14px] bg-link-blue rounded" /><span>{lang.ownerRole}</span></div>}
                     </div>
                   </div>
                   <div className="flex items-center w-[236px]">
@@ -293,8 +309,8 @@ const MyGroup = observer((props: Props) => {
                       options={state.seedNetAllType.map((type: string) => (
                         { name: GROUP_TEMPLATE_TYPE_NAME[type as GROUP_TEMPLATE_TYPE], value: type }
                       ))}
-                      selected={state.seedNetType}
-                      onFilter={(values) => { state.seedNetType = values; }}
+                      selected={state.seedNetFilterType}
+                      onFilter={(values) => { state.seedNetFilterType = values; }}
                     />
                   </div>
                   <div className="flex items-center w-[203px]">
@@ -302,8 +318,8 @@ const MyGroup = observer((props: Props) => {
                       options={state.seedNetAllType.map((type: string) => (
                         { name: GROUP_TEMPLATE_TYPE_NAME[type as GROUP_TEMPLATE_TYPE], value: type }
                       ))}
-                      selected={state.seedNetType}
-                      onFilter={(values) => { state.seedNetType = values; }}
+                      selected={state.seedNetFilterType}
+                      onFilter={(values) => { state.seedNetFilterType = values; }}
                     />
                   </div>
                 </div>

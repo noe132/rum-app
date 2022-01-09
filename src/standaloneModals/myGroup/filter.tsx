@@ -2,31 +2,41 @@ import React from 'react';
 import classNames from 'classnames';
 import { toJS, action } from 'mobx';
 import { MdArrowDropDown, MdArrowDropUp } from 'react-icons/md';
-import { RiCheckboxBlankLine, RiCheckboxFill, RiCheckboxIndeterminateLine, RiCheckLine } from 'react-icons/ri';
+import {
+  RiCheckboxBlankLine,
+  RiCheckboxFill,
+  RiCheckboxIndeterminateLine,
+  RiCheckLine,
+  RiCloseCircleFill,
+} from 'react-icons/ri';
 import { observer, useLocalObservable } from 'mobx-react-lite';
 import { Popover } from '@material-ui/core';
 import { lang } from 'utils/lang';
 import Button from 'components/Button';
+import { assetsBasePath } from 'utils/env';
 
 interface Props {
   className?: string
+  allText?: string
   options: Array<any>
   selected: Array<string>
   onFilter: (value: Array<string>) => unknown
 }
 
 export default observer((props: Props) => {
-  const state = useLocalObservable(() => ({
-    showMenu: false,
-    selected: [] as string[],
-  }));
-
   const {
     className,
     options,
     selected,
     onFilter,
+    allText,
   } = props;
+
+  const state = useLocalObservable(() => ({
+    showMenu: false,
+    selected,
+  }));
+
 
   const selector = React.useRef<HTMLDivElement>(null);
 
@@ -58,9 +68,7 @@ export default observer((props: Props) => {
   });
 
   React.useEffect(action(() => {
-    if (state.showMenu) {
-      state.selected = selected;
-    }
+    state.selected = selected;
   }), [state.showMenu]);
 
   return (
@@ -75,13 +83,26 @@ export default observer((props: Props) => {
         }}
         ref={selector}
       >
-        <div className="w-25 flex items-center justify-center text-12 text-gray-6f">全部类型</div>
         {
-          state.showMenu ? (
-            <div className="w-6 flex items-center justify-center text-24 text-producer-blue border rounded m-[-1px]"><MdArrowDropUp /></div>
-          ) : (
-            <div className="w-6 flex items-center justify-center text-24 text-gray-6f border rounded m-[-1px]"><MdArrowDropDown /></div>
-
+          state.selected.length === options.length
+            ? <div className="w-25 flex items-center justify-center text-12 text-gray-6f">{allText || lang.all}</div>
+            : <div className="w-25 flex items-center justify-center text-12 text-gray-6f">{`${lang.selected} ${state.selected.length} ${lang.option}`} <RiCloseCircleFill className="ml-2 text-16 cursor-pointer" /></div>
+        }
+        {
+          state.showMenu && <div className="w-6 flex items-center justify-center text-24 text-producer-blue border rounded m-[-1px]"><MdArrowDropUp /></div>
+        }
+        {
+          !state.showMenu && state.selected.length === options.length && <div className="w-6 flex items-center justify-center text-24 text-gray-6f border rounded m-[-1px]"><MdArrowDropDown /></div>
+        }
+        {
+          !state.showMenu && state.selected.length !== options.length && (
+            <div className="w-6 flex items-center justify-center text-24 text-gray-6f border rounded m-[-1px]">
+              <img
+                className="text-producer-blue"
+                src={`${assetsBasePath}/iconFilter.svg`}
+                alt={lang.back}
+              />
+            </div>
           )
         }
       </div>
