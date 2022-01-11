@@ -403,6 +403,8 @@ export const content = {
   cleanSelected: '清空选择',
   profile: '身份资料',
   allProfile: '全部资料',
+  create: '新建',
+  requireAvatar: '请选择和上传头像',
 };
 
 export type Content = typeof content;

@@ -24,6 +24,8 @@ import {
 import { GROUP_TEMPLATE_TYPE, GROUP_TEMPLATE_TYPE_NAME, GROUP_TEMPLATE_TYPE_ICON } from 'utils/constant';
 import { format } from 'date-fns';
 import Filter from './filter';
+import ProfileSelector from './profileSelector';
+import MixinUIDSelector from './mixinUIDSelector';
 import Order from './order';
 import useIsGroupOwner from 'store/selectors/useIsGroupOwner';
 import * as PersonModel from 'hooks/useDatabase/models/person';
@@ -36,19 +38,33 @@ const GROUP_ROLE_NAME: any = {
 
 const groupProfile = (groups: any) => {
   const profileMap: any = {};
+  const mixinUIDMap: any = {};
   groups.forEach((group: any) => {
     if (group.profileTag in profileMap) {
       profileMap[group.profileTag].count += 1;
     } else {
       profileMap[group.profileTag] = {
-        label: <div>{group.profile.name}</div>,
-        value: group.profileTag,
+        profileTag: group.profileTag,
         profile: group.profile,
         count: 1,
       };
     }
+    if (group.profile.mixinUID) {
+      if (group.profile.mixinUID in mixinUIDMap) {
+        mixinUIDMap[group.profile.mixinUID].count += 1;
+      } else {
+        mixinUIDMap[group.profile.mixinUID] = {
+          mixinUID: group.profile.mixinUID,
+          profile: group.profile,
+          count: 1,
+        };
+      }
+    }
   });
-  return Object.values(profileMap).sort((a: any, b: any) => b.count - a.count);
+  return [
+    Object.values(profileMap).sort((a: any, b: any) => b.count - a.count),
+    Object.values(mixinUIDMap).sort((a: any, b: any) => b.count - a.count),
+  ];
 };
 
 export const myGroup = async () => new Promise<void>((rs) => {
@@ -91,6 +107,8 @@ const MyGroup = observer((props: Props) => {
     allRole: [] as any,
     filterProfile: [] as any,
     allProfile: [] as any,
+    filterMixinUID: [] as any,
+    allMixinUID: [] as any,
     createTimeOrder: '',
     walletOrder: '',
     selected: [] as string[],
@@ -139,18 +157,26 @@ const MyGroup = observer((props: Props) => {
     if (state.createTimeOrder === 'desc') {
       newGroups = newGroups.sort((a, b) => b.last_updated - a.last_updated);
     }
+    if (state.walletOrder === 'asc') {
+      newGroups = newGroups.sort((a, b) => a.profile.mixinUID.localeCompare(b.profile.mixinUID));
+    }
+    if (state.walletOrder === 'desc') {
+      newGroups = newGroups.sort((a, b) => b.profile.mixinUID.localeCompare(a.profile.mixinUID));
+    }
     state.localGroups = newGroups;
     state.selected = state.selected.filter((id) => state.groups.map((group) => group.group_id).includes(id));
-  }), [state, state.createTimeOrder, state.filterSeedNetType, state.filterRole, state.filterProfile, state.keyword]);
+  }), [state, state.createTimeOrder, state.walletOrder, state.filterSeedNetType, state.filterRole, state.filterProfile, state.keyword]);
 
   React.useEffect(action(() => {
     state.allSeedNetType = [...new Set(state.groups.map((group) => group.app_key))];
     state.filterSeedNetType = [...new Set(state.groups.map((group) => group.app_key))];
     state.allRole = [...new Set(state.groups.map((group) => group.role))];
     state.filterRole = [...new Set(state.groups.map((group) => group.role))];
-    const profiles = groupProfile(state.groups);
+    const [profiles, mixinUIDs] = groupProfile(state.groups);
     state.allProfile = profiles;
-    state.filterProfile = profiles.map((profile: any) => profile.value);
+    state.filterProfile = profiles.map((profile: any) => profile.profileTag);
+    state.allMixinUID = mixinUIDs;
+    state.filterMixinUID = mixinUIDs.map((mixinUID: any) => mixinUID.mixinUID);
   }), [state.groups]);
 
   React.useEffect(action(() => {
@@ -258,7 +284,9 @@ const MyGroup = observer((props: Props) => {
               <div className="text-gray-af text-12 scale-[0.85]">{lang.profile}</div>
               <Filter
                 allText={lang.allProfile}
-                options={state.allProfile}
+                options={state.allProfile.map((profile: any) => (
+                  { label: <div key={profile.profileTag} className="flex items-center"><div className="mr-1 flex items-center justify-center box-content w-[28px] h-[28px] bg-white border-2 rounded-full overflow-hidden"><img src={profile.profile.avatar} /></div><div className="max-w-[68px] truncate flex-grow">{profile.profile.name}</div><div className="ml-2 text-12 text-gray-9c">{profile.count}</div></div>, value: profile.profileTag }
+                ))}
                 selected={state.filterProfile}
                 onFilter={(values) => { state.filterProfile = values; }}
               />
@@ -312,7 +340,7 @@ const MyGroup = observer((props: Props) => {
               <Order
                 className="text-20"
                 order={state.createTimeOrder}
-                onClick={(order: string) => { state.createTimeOrder = order; }}
+                onClick={(order: string) => { state.walletOrder = ''; state.createTimeOrder = order; }}
               />
             </div>
             <div className="flex items-center w-[203px]">
@@ -320,15 +348,15 @@ const MyGroup = observer((props: Props) => {
               <Order
                 className="text-20"
                 order={state.walletOrder}
-                onClick={(order: string) => { state.walletOrder = order; }}
+                onClick={(order: string) => { state.createTimeOrder = ''; state.walletOrder = order; }}
               />
             </div>
           </div>
 
           <div className="w-[960px] flex-1text-gray-6d mb-8 bg-white">
             {
-              state.localGroups.map((group: IGroup & { role?: string }) => (
-                <div key={group.group_id} className="px-5 h-[88px] flex items-center border-t border-gray-fa">
+              state.localGroups.map((group: IGroup & { role: string, profile: any, profileTag: string }) => (
+                <div key={group.group_id} className="group-item px-5 h-[88px] flex items-center border-t border-gray-fa">
                   <div className="flex items-center w-[86px]">
                     <div onClick={() => handleSelect(group.group_id)}>
                       {
@@ -359,22 +387,23 @@ const MyGroup = observer((props: Props) => {
                     </div>
                   </div>
                   <div className="flex items-center w-[236px]">
-                    <Filter
-                      options={state.allSeedNetType.map((type: string) => (
-                        { label: GROUP_TEMPLATE_TYPE_NAME[type as GROUP_TEMPLATE_TYPE], value: type }
-                      ))}
-                      selected={state.filterSeedNetType}
-                      onFilter={(values) => { state.filterSeedNetType = values; }}
+                    <ProfileSelector
+                      groupId={group.group_id}
+                      profiles={state.allProfile}
+                      selected={group.profileTag}
+                      onFilter={(values) => { state.filterProfile = values; }}
                     />
                   </div>
                   <div className="flex items-center w-[203px]">
-                    <Filter
-                      options={state.allSeedNetType.map((type: string) => (
-                        { label: GROUP_TEMPLATE_TYPE_NAME[type as GROUP_TEMPLATE_TYPE], value: type }
-                      ))}
-                      selected={state.filterSeedNetType}
-                      onFilter={(values) => { state.filterSeedNetType = values; }}
+                    <MixinUIDSelector
+                      groupId={group.group_id}
+                      profiles={state.allMixinUID}
+                      selected={group.profile.mixinUID}
+                      onFilter={(values) => { state.filterMixinUID = values; }}
                     />
+                    <div className="unfollow ml-4 w-8 h-8 flex items-center justify-center text-26 text-producer-blue border border-gray-f2 rounded m-[-1px] cursor-pointer">
+                      <img src={`${assetsBasePath}/unfollow.svg`} />
+                    </div>
                   </div>
                 </div>
               ))
@@ -392,6 +421,12 @@ const MyGroup = observer((props: Props) => {
             padding: 2px 32px 2px 13px !important;
             font-size: 14px;
             color: #333333;
+          }
+          .group-item .unfollow {
+            visibility: hidden;
+          }
+          .group-item:hover .unfollow {
+            visibility: visible !important;
           }
         `}</style>
       </div>

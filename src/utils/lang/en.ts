@@ -403,4 +403,6 @@ export const content = {
   cleanSelected: 'Clean Selected',
   profile: 'Profile',
   allProfile: 'All Profile',
+  create: 'create ',
+  requireAvatar: 'Please select or upload avatar',
 };

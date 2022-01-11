@@ -163,7 +163,7 @@ export default observer((props: Props) => {
             <div
               key={option.value}
               className={classNames(
-                'px-3 py-2 flex items-center rounded border gap-x-3 cursor-pointer',
+                'px-3 h-[26px] flex items-center rounded border gap-x-3 cursor-pointer',
                 state.selected.includes(option.value) && 'bg-gray-f2',
               )}
               onClick={() => handleSelect(option.value)}
@@ -174,7 +174,7 @@ export default observer((props: Props) => {
                   state.selected.includes(option.value) ? 'text-gray-af border-gray-f2' : 'text-white border-gray-af',
                 )}
               />
-              <div className="text-gray-4a">{option.label}</div>
+              <div className="text-gray-4a flex-grow">{option.label}</div>
             </div>
           ))
         }
