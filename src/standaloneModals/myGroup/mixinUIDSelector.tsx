@@ -18,19 +18,18 @@ import * as PersonModel from 'hooks/useDatabase/models/person';
 import useDatabase from 'hooks/useDatabase';
 
 interface Props {
-  className?: string
-  groupId: string
+  groupIds: string[]
   profiles: Array<any>
-  selected: string
-  onFilter: (value: Array<string>) => unknown
+  selected?: string
+  type?: string
 }
 
 export default observer((props: Props) => {
   const {
-    className,
+    type,
     profiles,
     selected,
-    groupId,
+    groupIds,
   } = props;
 
   const state = useLocalObservable(() => ({
@@ -48,7 +47,6 @@ export default observer((props: Props) => {
   const handleMenuClose = action(() => { state.showMenu = false; });
 
   const submitPerson = useSubmitPerson();
-  const groupIds = [groupId];
 
   const updateMixinPayment = async (mixinUID: string) => {
     try {
@@ -93,46 +91,60 @@ export default observer((props: Props) => {
 
   return (
     <>
-      <div
-        className={classNames(
-          className,
-          'h-8 flex items-stretch bg-white rounded border border-gray-f2 cursor-pointer',
-        )}
-        onClick={() => {
-          state.showMenu = !state.showMenu;
-        }}
-        ref={selector}
-      >
-        <div className="w-[98px] pr-1.5 flex items-center justify-center">
-          {
-            selectedProfile ? (
-              <img
-                className="ml-2 mr-1 flex-shrink-0"
-                src={`${assetsBasePath}/icon_wallet_2.svg`}
-                alt={lang.create}
-              />
-            ) : (
-              <img
-                className="ml-1 flex-shrink-0"
-                src={`${assetsBasePath}/wallet_gray.svg`}
-                alt={lang.create}
-              />
-            )
-          }
+      {
+        type === 'button' ? (
+          <div
+            className="h-6 border border-gray-af rounded pl-2 pr-[14px] flex items-center justify-center text-12 cursor-pointer"
+            onClick={() => {
+              state.showMenu = !state.showMenu;
+            }}
+            ref={selector}
+          >
+            <img className="w-[18px] h-[18px] mr-1.5" src={`${assetsBasePath}/bond.svg`} />
+            {lang.bindOrUnbindWallet}
+          </div>
+        ) : (
           <div
             className={classNames(
-              'text-14 flex-grow truncate',
-              selected ? 'text-gray-4a' : 'text-gray-9c',
+              'h-8 flex items-stretch bg-white rounded border border-gray-f2 cursor-pointer',
             )}
-          >{selectedProfile ? selectedProfile.mixinUID.slice(0, 8) : '未绑定'}</div>
-        </div>
-        {
-          state.showMenu && <div className="w-8 flex items-center justify-center text-26 text-producer-blue border border-gray-f2 rounded m-[-1px]"><MdArrowDropUp /></div>
-        }
-        {
-          !state.showMenu && <div className="w-8 flex items-center justify-center text-26 text-gray-af border border-gray-f2 rounded m-[-1px]"><MdArrowDropDown /></div>
-        }
-      </div>
+            onClick={() => {
+              state.showMenu = !state.showMenu;
+            }}
+            ref={selector}
+          >
+            <div className="w-[98px] pr-1.5 flex items-center justify-center">
+              {
+                selectedProfile ? (
+                  <img
+                    className="ml-2 mr-1 flex-shrink-0"
+                    src={`${assetsBasePath}/icon_wallet_2.svg`}
+                    alt={lang.create}
+                  />
+                ) : (
+                  <img
+                    className="ml-1 flex-shrink-0"
+                    src={`${assetsBasePath}/wallet_gray.svg`}
+                    alt={lang.create}
+                  />
+                )
+              }
+              <div
+                className={classNames(
+                  'text-14 flex-grow truncate',
+                  selected ? 'text-gray-4a' : 'text-gray-9c',
+                )}
+              >{selectedProfile ? selectedProfile.mixinUID.slice(0, 8) : '未绑定'}</div>
+            </div>
+            {
+              state.showMenu && <div className="w-8 flex items-center justify-center text-26 text-producer-blue border border-gray-f2 rounded m-[-1px]"><MdArrowDropUp /></div>
+            }
+            {
+              !state.showMenu && <div className="w-8 flex items-center justify-center text-26 text-gray-af border border-gray-f2 rounded m-[-1px]"><MdArrowDropDown /></div>
+            }
+          </div>
+        )
+      }
       <Popover
         open={state.showMenu}
         onClose={handleMenuClose}
@@ -156,7 +168,26 @@ export default observer((props: Props) => {
           onClick={async () => {
             updateMixinPayment(await getMixinUID());
           }}
-        ><RiAddLine />{lang.bindNewWallet}</Button>
+        >
+          <RiAddLine />
+          {lang.bindNewWallet}
+        </Button>
+        {
+          type === 'button' && (
+            <Button
+              className="w-full h-7 rounded flex items-center justify-center"
+              onClick={() => {
+                updateMixinPayment('');
+              }}
+            >
+              <img
+                onClick={() => updateMixinPayment('')}
+                src={`${assetsBasePath}/unlink_wallet.svg`}
+              />
+              {lang.unbind}
+            </Button>
+          )
+        }
         {
           profiles.map((profile) => (
             <div
@@ -178,14 +209,18 @@ export default observer((props: Props) => {
                   selected === profile.mixinUID ? 'text-white' : 'text-gray-9c',
                 )}
               >{profile.count}</div>
-              <img
-                className={classNames(
-                  'flex-shrink-0 cursor-pointer',
-                  selected === profile.mixinUID || 'invisible',
-                )}
-                onClick={() => updateMixinPayment('')}
-                src={`${assetsBasePath}/unlink_wallet.svg`}
-              />
+              {
+                type !== 'button' && (
+                  <img
+                    className={classNames(
+                      'flex-shrink-0 cursor-pointer',
+                      selected === profile.mixinUID || 'invisible',
+                    )}
+                    onClick={() => updateMixinPayment('')}
+                    src={`${assetsBasePath}/unlink_wallet.svg`}
+                  />
+                )
+              }
             </div>
           ))
         }

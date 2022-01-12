@@ -154,7 +154,7 @@ export default observer((props: Props) => {
             {lang.selectAll}
           </div>
           <div
-            className="current-pointer rounded border px-2.5 flex items-center justify-center cursor-pointer"
+            className="ml-2 current-pointer rounded border px-2.5 flex items-center justify-center cursor-pointer"
             onClick={handleSelectReverse}
           >{lang.selectReverse}</div>
         </div>

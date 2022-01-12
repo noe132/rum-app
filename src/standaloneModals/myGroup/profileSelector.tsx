@@ -14,19 +14,18 @@ import { assetsBasePath } from 'utils/env';
 import editProfile from 'standaloneModals/editProfile';
 
 interface Props {
-  className?: string
-  groupId: string
+  groupIds: string[]
   profiles: Array<any>
-  selected: string
-  onFilter: (value: Array<string>) => unknown
+  selected?: string
+  type?: string
 }
 
 export default observer((props: Props) => {
   const {
-    className,
+    type,
     profiles,
     selected,
-    groupId,
+    groupIds,
   } = props;
 
   const state = useLocalObservable(() => ({
@@ -41,37 +40,51 @@ export default observer((props: Props) => {
 
   const handleEdit = action((profile?: any) => {
     state.showMenu = false;
-    editProfile({ groupIds: [groupId], profile });
+    editProfile({ groupIds, profile });
   });
 
   return (
     <>
-      <div
-        className={classNames(
-          className,
-          'h-8 flex items-stretch bg-white rounded-r border border-gray-f2 cursor-pointer',
-        )}
-        onClick={() => {
-          state.showMenu = !state.showMenu;
-        }}
-        ref={selector}
-      >
-        <div className="w-[165px] pr-1.5 flex items-center justify-center gap-x-1">
-          <img className="ml-[-16px] flex-shrink-0 flex items-center justify-center box-border border border-gray-f2 w-[32px] h-[32px] bg-white rounded-full overflow-hidden" src={selectedProfile.profile.avatar} />
-          <div className="truncate text-14 flex-grow text-gray-4a">{selectedProfile.profile.name}</div>
-          <img
-            className="flex-shrink-0"
-            src={`${assetsBasePath}/icon_add_gray.svg`}
-            alt={lang.create}
-          />
-        </div>
-        {
-          state.showMenu && <div className="w-8 flex items-center justify-center text-26 text-producer-blue border border-gray-f2 rounded m-[-1px]"><MdArrowDropUp /></div>
-        }
-        {
-          !state.showMenu && <div className="w-8 flex items-center justify-center text-26 text-gray-af border border-gray-f2 rounded m-[-1px]"><MdArrowDropDown /></div>
-        }
-      </div>
+      {
+        type === 'button' ? (
+          <div
+            className="h-6 border border-gray-af rounded pl-2 pr-[14px] flex items-center justify-center text-12 cursor-pointer"
+            onClick={() => {
+              state.showMenu = !state.showMenu;
+            }}
+            ref={selector}
+          >
+            <img className="w-[18px] h-[18px] mr-1.5" src={`${assetsBasePath}/iconSwich.svg`} />
+            {lang.changeProfile}
+          </div>
+        ) : (
+          <div
+            className={classNames(
+              'h-8 flex items-stretch bg-white rounded-r border border-gray-f2 cursor-pointer',
+            )}
+            onClick={() => {
+              state.showMenu = !state.showMenu;
+            }}
+            ref={selector}
+          >
+            <div className="w-[165px] pr-1.5 flex items-center justify-center gap-x-1">
+              <img className="ml-[-16px] flex-shrink-0 flex items-center justify-center box-border border border-gray-f2 w-[32px] h-[32px] bg-white rounded-full overflow-hidden" src={selectedProfile.profile.avatar} />
+              <div className="truncate text-14 flex-grow text-gray-4a">{selectedProfile.profile.name}</div>
+              <img
+                className="flex-shrink-0"
+                src={`${assetsBasePath}/icon_add_gray.svg`}
+                alt={lang.create}
+              />
+            </div>
+            {
+              state.showMenu && <div className="w-8 flex items-center justify-center text-26 text-producer-blue border border-gray-f2 rounded m-[-1px]"><MdArrowDropUp /></div>
+            }
+            {
+              !state.showMenu && <div className="w-8 flex items-center justify-center text-26 text-gray-af border border-gray-f2 rounded m-[-1px]"><MdArrowDropDown /></div>
+            }
+          </div>
+        )
+      }
       <Popover
         open={state.showMenu}
         onClose={handleMenuClose}

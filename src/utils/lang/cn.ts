@@ -94,6 +94,7 @@ export const content = {
   exited: '已退出',
   somethingWrong: '貌似出错了',
   confirmToExit: '确定要退出这个种子网络吗？',
+  confirmToExitAll: '确定要退出这些种子网络吗？',
   confirmToDelete: '确定要删除这个种子网络吗？',
   settingDone: '设置成功',
   confirmToUnBan: '确定要显示 Ta 的内容吗？',
@@ -334,6 +335,7 @@ export const content = {
     preview: '预览',
   },
   singleProducerConfirm: '你是本群组唯一的出块节点，你退出之后，群组将永久作废，也无法正常使用。<br /><br />如果退出之后，仍然想要群组能继续正常运行，你可以添加另外一个出块节点来承担出块的工作<br /><br />',
+  singleProducerConfirmAll: '你是一些群组唯一的出块节点，你退出之后，群组将永久作废，也无法正常使用。<br /><br />如果退出之后，仍然想要群组能继续正常运行，你可以添加另外一个出块节点来承担出块的工作<br /><br />',
   addProducerFeedback: '我已经通过了你的申请，欢迎你成为本群组的出块节点',
   removeProducerFeedback: '我已经将你从出块节点的名单中移除，你不再是本群组的出块节点',
   emptyAnnouncement: '暂时没有需要处理的申请',
@@ -406,6 +408,10 @@ export const content = {
   allProfile: '全部资料',
   create: '新建',
   requireAvatar: '请选择和上传头像',
+  item: '个',
+  changeProfile: '修改身份资料',
+  bindOrUnbindWallet: '钱包绑定/解绑',
+  unbind: '解绑',
 };
 
 export type Content = typeof content;
