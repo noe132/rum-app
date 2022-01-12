@@ -48,10 +48,9 @@ export default observer((props: Props) => {
   const handleMenuClose = action(() => { state.showMenu = false; });
 
   const submitPerson = useSubmitPerson();
-  
   const groupIds = [groupId];
 
-  const bindMixinPayment = async (mixinUID: string) => {
+  const updateMixinPayment = async (mixinUID: string) => {
     try {
       for (const groupId of groupIds) {
         let profile = {} as any;
@@ -85,14 +84,11 @@ export default observer((props: Props) => {
     }
   };
 
-  const handleBind = action( async (mixinUID?: string) => {
-    if (mixinUID) {
-      console.log(mixinUID);
-    } else {
-      mixinUID = await getMixinUID();
-      console.log(mixinUID);
+  const handleUpdate = action((mixinUID: string) => {
+    if (selected === mixinUID) {
+      return;
     }
-    bindMixinPayment(mixinUID);
+    updateMixinPayment(mixinUID);
   });
 
   return (
@@ -157,17 +153,19 @@ export default observer((props: Props) => {
         <RiCloseLine className="absolute top-1.5 right-1.5 cursor-pointer text-gray-70" onClick={handleMenuClose} />
         <Button
           className="w-full h-7 rounded flex items-center justify-center"
-          onClick={() => handleBind()}
+          onClick={async () => {
+            updateMixinPayment(await getMixinUID());
+          }}
         ><RiAddLine />{lang.bindNewWallet}</Button>
         {
           profiles.map((profile) => (
             <div
               key={profile.mixinUID}
               className={classNames(
-                'pl-1 px-2.5 h-[26px] flex items-center rounded gap-x-2 cursor-pointer',
-                selected === profile.mixinUID ? 'bg-black text-white' : 'bg-gray-f2 text-gray-4a',
+                'pl-1 px-2.5 h-[26px] flex items-center rounded gap-x-2',
+                selected === profile.mixinUID ? 'bg-black text-white' : 'bg-gray-f2 text-gray-4a cursor-pointer',
               )}
-              onClick={() => handleBind(profile.mixinUID)}
+              onClick={() => handleUpdate(profile.mixinUID)}
             >
               <img
                 className="ml-1 flex-shrink-0"
@@ -182,11 +180,11 @@ export default observer((props: Props) => {
               >{profile.count}</div>
               <img
                 className={classNames(
-                  'flex-shrink-0',
+                  'flex-shrink-0 cursor-pointer',
                   selected === profile.mixinUID || 'invisible',
                 )}
+                onClick={() => updateMixinPayment('')}
                 src={`${assetsBasePath}/unlink_wallet.svg`}
-                alt={lang.create}
               />
             </div>
           ))

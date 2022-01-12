@@ -30,6 +30,7 @@ import Order from './order';
 import useIsGroupOwner from 'store/selectors/useIsGroupOwner';
 import * as PersonModel from 'hooks/useDatabase/models/person';
 import useDatabase from 'hooks/useDatabase';
+import { useLeaveGroup } from 'hooks/useLeaveGroup';
 
 const GROUP_ROLE_NAME: any = {
   'owner': <div className="flex items-center"><div className="mr-1 w-[3px] h-[14px] bg-link-blue rounded" /><span>{lang.ownerRole}</span></div>,
@@ -114,9 +115,10 @@ const MyGroup = observer((props: Props) => {
     selected: [] as string[],
   }));
 
-  const { groupStore } = useStore();
+  const { groupStore, latestStatusStore, confirmDialogStore } = useStore();
 
   const database = useDatabase();
+  const leaveGroup = useLeaveGroup();
 
   const scrollBox = React.useRef<HTMLDivElement>(null);
 
@@ -145,6 +147,32 @@ const MyGroup = observer((props: Props) => {
     props.rs();
     state.open = false;
   });
+
+  const handleLeaveGroup = (group: any) => {
+    let confirmText = '';
+    const latestStatus = latestStatusStore.map[group.group_id] || latestStatusStore.DEFAULT_LATEST_STATUS;
+    if (latestStatus.producerCount === 1 && group.role === 'owner') {
+      confirmText = lang.singleProducerConfirm;
+    }
+    confirmText += lang.confirmToExit;
+    confirmDialogStore.show({
+      content: `<div>${confirmText}</div>`,
+      okText: lang.yes,
+      isDangerous: true,
+      maxWidth: 340,
+      ok: () => {
+        if (confirmDialogStore.loading) {
+          return;
+        }
+        confirmDialogStore.setLoading(true);
+        leaveGroup(group.group_id).then(() => {
+          confirmDialogStore.hide();
+        }).finally(() => {
+          confirmDialogStore.setLoading(false);
+        });
+      },
+    });
+  };
 
   React.useEffect(action(() => {
     let newGroups = state.groups.filter((group) => state.filterSeedNetType.includes(group.app_key) && state.filterRole.includes(group.role) && state.filterProfile.includes(group.profileTag));
@@ -401,7 +429,10 @@ const MyGroup = observer((props: Props) => {
                       selected={group.profile.mixinUID}
                       onFilter={(values) => { state.filterMixinUID = values; }}
                     />
-                    <div className="unfollow ml-4 w-8 h-8 flex items-center justify-center text-26 text-producer-blue border border-gray-f2 rounded m-[-1px] cursor-pointer">
+                    <div
+                      className="unfollow ml-4 w-8 h-8 flex items-center justify-center text-26 text-producer-blue border border-gray-f2 rounded m-[-1px] cursor-pointer"
+                      onClick={() => handleLeaveGroup(group)}
+                    >
                       <img src={`${assetsBasePath}/unfollow.svg`} />
                     </div>
                   </div>
