@@ -11,11 +11,15 @@ import { observer, useLocalObservable } from 'mobx-react-lite';
 import { Popover } from '@material-ui/core';
 import { lang } from 'utils/lang';
 import Button from 'components/Button';
-import { assetsBasePath } from 'utils/env';
 import getMixinUID from 'standaloneModals/getMixinUID';
 import useSubmitPerson from 'hooks/useSubmitPerson';
 import * as PersonModel from 'hooks/useDatabase/models/person';
 import useDatabase from 'hooks/useDatabase';
+import BindIcon from 'assets/bond.svg';
+import WalletIcon2 from 'assets/icon_wallet_2.svg';
+import WalletIcon3 from 'assets/icon_wallet_3.svg';
+import WalletGrayIcon from 'assets/wallet_gray.svg';
+import UnlinkWalletIcon from 'assets/unlink_wallet.svg';
 
 interface Props {
   groupIds: string[]
@@ -100,7 +104,7 @@ export default observer((props: Props) => {
             }}
             ref={selector}
           >
-            <img className="w-[18px] h-[18px] mr-1.5" src={`${assetsBasePath}/bond.svg`} />
+            <img className="w-[18px] h-[18px] mr-1.5" src={BindIcon} />
             {lang.bindOrUnbindWallet}
           </div>
         ) : (
@@ -118,13 +122,13 @@ export default observer((props: Props) => {
                 selectedProfile ? (
                   <img
                     className="ml-2 mr-1 flex-shrink-0"
-                    src={`${assetsBasePath}/icon_wallet_2.svg`}
+                    src={WalletIcon2}
                     alt={lang.create}
                   />
                 ) : (
                   <img
                     className="ml-1 flex-shrink-0"
-                    src={`${assetsBasePath}/wallet_gray.svg`}
+                    src={WalletGrayIcon}
                     alt={lang.create}
                   />
                 )
@@ -182,7 +186,7 @@ export default observer((props: Props) => {
             >
               <img
                 onClick={() => updateMixinPayment('')}
-                src={`${assetsBasePath}/unlink_wallet.svg`}
+                src={UnlinkWalletIcon}
               />
               {lang.unbind}
             </Button>
@@ -200,7 +204,7 @@ export default observer((props: Props) => {
             >
               <img
                 className="ml-1 flex-shrink-0"
-                src={`${assetsBasePath}/${selected === profile.mixinUID ? 'icon_wallet_3.svg' : 'icon_wallet_2.svg'}`}
+                src={selected === profile.mixinUID ? WalletIcon3 : WalletIcon2}
               />
               <div className="truncate text-14">{profile.mixinUID}</div>
               <div
@@ -217,7 +221,7 @@ export default observer((props: Props) => {
                       selected === profile.mixinUID || 'invisible',
                     )}
                     onClick={() => updateMixinPayment('')}
-                    src={`${assetsBasePath}/unlink_wallet.svg`}
+                    src={UnlinkWalletIcon}
                   />
                 )
               }

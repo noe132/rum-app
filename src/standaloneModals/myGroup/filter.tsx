@@ -13,7 +13,7 @@ import { observer, useLocalObservable } from 'mobx-react-lite';
 import { Popover } from '@material-ui/core';
 import { lang } from 'utils/lang';
 import Button from 'components/Button';
-import { assetsBasePath } from 'utils/env';
+import FilterIcon from 'assets/iconFilter.svg';
 
 interface Props {
   className?: string
@@ -114,7 +114,7 @@ export default observer((props: Props) => {
             <div className="w-6 flex items-center justify-center text-24 text-gray-6f border rounded m-[-1px]">
               <img
                 className="text-producer-blue"
-                src={`${assetsBasePath}/iconFilter.svg`}
+                src={FilterIcon}
                 alt={lang.back}
               />
             </div>

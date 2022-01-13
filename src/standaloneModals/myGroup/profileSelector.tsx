@@ -10,8 +10,10 @@ import { observer, useLocalObservable } from 'mobx-react-lite';
 import { Popover } from '@material-ui/core';
 import { lang } from 'utils/lang';
 import Button from 'components/Button';
-import { assetsBasePath } from 'utils/env';
 import editProfile from 'standaloneModals/editProfile';
+import SwitchIcon from 'assets/iconSwich.svg';
+import AddGrayIcon from 'assets/icon_add_gray.svg';
+import AddWhiteIcon from 'assets/icon_add_white.svg';
 
 interface Props {
   groupIds: string[]
@@ -54,7 +56,7 @@ export default observer((props: Props) => {
             }}
             ref={selector}
           >
-            <img className="w-[18px] h-[18px] mr-1.5" src={`${assetsBasePath}/iconSwich.svg`} />
+            <img className="w-[18px] h-[18px] mr-1.5" src={SwitchIcon} />
             {lang.changeProfile}
           </div>
         ) : (
@@ -72,7 +74,7 @@ export default observer((props: Props) => {
               <div className="truncate text-14 flex-grow text-gray-4a">{selectedProfile.profile.name}</div>
               <img
                 className="flex-shrink-0"
-                src={`${assetsBasePath}/icon_add_gray.svg`}
+                src={AddGrayIcon}
                 alt={lang.create}
               />
             </div>
@@ -134,7 +136,7 @@ export default observer((props: Props) => {
               >{profile.count}</div>
               <img
                 className="flex-shrink-0"
-                src={selected === profile.profileTag ? `${assetsBasePath}/icon_add_white.svg` : `${assetsBasePath}/icon_add_gray.svg`}
+                src={selected === profile.profileTag ? AddWhiteIcon : AddGrayIcon}
                 alt={lang.create}
               />
             </div>

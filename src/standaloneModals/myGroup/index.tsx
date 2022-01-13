@@ -11,7 +11,6 @@ import { IGroup } from 'apis/group';
 import { ThemeRoot } from 'utils/theme';
 import { StoreProvider, useStore } from 'store';
 import { lang } from 'utils/lang';
-import { assetsBasePath } from 'utils/env';
 import { joinGroup } from 'standaloneModals/joinGroup';
 import { createGroup } from 'standaloneModals/createGroup';
 import { IoSearch } from 'react-icons/io5';
@@ -33,6 +32,11 @@ import useDatabase from 'hooks/useDatabase';
 import { useLeaveGroup } from 'hooks/useLeaveGroup';
 import Help from 'layouts/Main/Help';
 import BackToTop from 'components/BackToTop';
+import ReturnIcon from 'assets/iconReturn.svg';
+import JoinSeedIcon from 'assets/joinSeed.svg';
+import CreateSeedIcon from 'assets/createSeed.svg';
+import UnfollowGrayIcon from 'assets/unfollow_gray.svg';
+import UnfollowIcon from 'assets/unfollow.svg';
 
 const GROUP_ROLE_NAME: any = {
   'owner': <div className="flex items-center"><div className="mr-1 w-[3px] h-[14px] bg-link-blue rounded" /><span>{lang.ownerRole}</span></div>,
@@ -256,7 +260,7 @@ const MyGroup = observer((props: Props) => {
           >
             <img
               className="text-producer-blue text-24"
-              src={`${assetsBasePath}/iconReturn.svg`}
+              src={ReturnIcon}
               alt={lang.back}
             />
             {lang.back}
@@ -271,7 +275,7 @@ const MyGroup = observer((props: Props) => {
             }}
           >
             <img
-              src={`${assetsBasePath}/joinSeed.svg`}
+              src={JoinSeedIcon}
               alt={lang.joinSeedGroup}
             />
             {lang.joinSeedGroup}
@@ -283,7 +287,7 @@ const MyGroup = observer((props: Props) => {
             }}
           >
             <img
-              src={`${assetsBasePath}/createSeed.svg`}
+              src={CreateSeedIcon}
               alt={lang.createGroup}
             />
             {lang.createGroup}
@@ -418,7 +422,7 @@ const MyGroup = observer((props: Props) => {
                     className="h-5 border border-gray-af rounded pl-2 pr-[14px] flex items-center justify-center text-12 cursor-pointer"
                     onClick={() => handleLeaveGroup(state.groups.filter((group) => state.selected.includes(group.group_id)))}
                   >
-                    <img className="w-[18px] h-[18px] mr-1.5" src={`${assetsBasePath}/unfollow_gray.svg`} />
+                    <img className="w-[18px] h-[18px] mr-1.5" src={UnfollowGrayIcon} />
                     {lang.exitGroup}
                   </div>
                 </div>
@@ -485,7 +489,7 @@ const MyGroup = observer((props: Props) => {
                       )}
                       onClick={() => handleLeaveGroup([group])}
                     >
-                      <img src={`${assetsBasePath}/unfollow.svg`} />
+                      <img src={UnfollowIcon} />
                     </div>
                   </div>
                 </div>
