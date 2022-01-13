@@ -412,4 +412,6 @@ export const content = {
   changeProfile: 'Change Profile',
   bindOrUnbindWallet: 'Bind/Unbind Wallet',
   unbind: 'Unbind',
+  sidebarIconStyleMode: 'icon',
+  sidebarListStyleMode: 'list',
 };

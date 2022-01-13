@@ -412,6 +412,8 @@ export const content = {
   changeProfile: '修改身份资料',
   bindOrUnbindWallet: '钱包绑定/解绑',
   unbind: '解绑',
+  sidebarIconStyleMode: '图标模式',
+  sidebarListStyleMode: '列表管理模式',
 };
 
 export type Content = typeof content;
