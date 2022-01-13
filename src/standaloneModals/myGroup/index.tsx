@@ -26,9 +26,6 @@ import Filter from './filter';
 import ProfileSelector from './profileSelector';
 import MixinUIDSelector from './mixinUIDSelector';
 import Order from './order';
-import useIsGroupOwner from 'store/selectors/useIsGroupOwner';
-import * as PersonModel from 'hooks/useDatabase/models/person';
-import useDatabase from 'hooks/useDatabase';
 import { useLeaveGroup } from 'hooks/useLeaveGroup';
 import Help from 'layouts/Main/Help';
 import BackToTop from 'components/BackToTop';
@@ -123,7 +120,6 @@ const MyGroup = observer((props: Props) => {
 
   const { groupStore, latestStatusStore, confirmDialogStore } = useStore();
 
-  const database = useDatabase();
   const leaveGroup = useLeaveGroup();
 
   const scrollBox = React.useRef<HTMLDivElement>(null);
@@ -188,7 +184,7 @@ const MyGroup = observer((props: Props) => {
   };
 
   React.useEffect(action(() => {
-    let newGroups = state.groups.filter((group) => state.filterSeedNetType.includes(group.app_key) && state.filterRole.includes(group.role) && state.filterProfile.includes(group.profileTag));
+    let newGroups = groupStore.groups.filter((group) => state.filterSeedNetType.includes(group.app_key) && state.filterRole.includes(group.role) && state.filterProfile.includes(group.profileTag));
     if (state.keyword) {
       newGroups = newGroups.filter((group) => group.group_name.includes(state.keyword));
     }
@@ -209,34 +205,16 @@ const MyGroup = observer((props: Props) => {
   }), [state, state.createTimeOrder, state.walletOrder, state.filterSeedNetType, state.filterRole, state.filterProfile, state.keyword]);
 
   React.useEffect(action(() => {
-    state.allSeedNetType = [...new Set(state.groups.map((group) => group.app_key))];
-    state.filterSeedNetType = [...new Set(state.groups.map((group) => group.app_key))];
-    state.allRole = [...new Set(state.groups.map((group) => group.role))];
-    state.filterRole = [...new Set(state.groups.map((group) => group.role))];
-    const [profiles, mixinUIDs] = groupProfile(state.groups);
+    console.log(groupStore.groups);
+    state.allSeedNetType = [...new Set(groupStore.groups.map((group) => group.app_key))];
+    state.filterSeedNetType = [...new Set(groupStore.groups.map((group) => group.app_key))];
+    state.allRole = [...new Set(groupStore.groups.map((group) => group.role))];
+    state.filterRole = [...new Set(groupStore.groups.map((group) => group.role))];
+    const [profiles, mixinUIDs] = groupProfile(groupStore.groups);
     state.allProfile = profiles;
     state.filterProfile = profiles.map((profile: any) => profile.profileTag);
     state.allMixinUID = mixinUIDs;
     state.filterMixinUID = mixinUIDs.map((mixinUID: any) => mixinUID.mixinUID);
-  }), [state.groups]);
-
-  React.useEffect(action(() => {
-    (async () => {
-      const groups = groupStore.groups.map((group: IGroup & { role?: string, profile?: any, profileTag?: string }) => {
-        group.role = useIsGroupOwner(group) ? 'owner' : 'user';
-        return group;
-      });
-      await Promise.all(groups.map(async (group) => {
-        const latestPerson = await PersonModel.getUser(database, {
-          GroupId: group.group_id,
-          Publisher: group.user_pubkey,
-          latest: true,
-        });
-        group.profile = latestPerson.profile;
-        group.profileTag = latestPerson.profile.name + latestPerson.profile.avatar;
-      }));
-      state.groups = groups;
-    })();
   }), [groupStore.groups]);
 
   React.useEffect(action(() => {
@@ -420,7 +398,7 @@ const MyGroup = observer((props: Props) => {
                   />
                   <div
                     className="h-5 border border-gray-af rounded pl-2 pr-[14px] flex items-center justify-center text-12 cursor-pointer"
-                    onClick={() => handleLeaveGroup(state.groups.filter((group) => state.selected.includes(group.group_id)))}
+                    onClick={() => handleLeaveGroup(groupStore.groups.filter((group) => state.selected.includes(group.group_id)))}
                   >
                     <img className="w-[18px] h-[18px] mr-1.5" src={UnfollowGrayIcon} />
                     {lang.exitGroup}
@@ -432,7 +410,7 @@ const MyGroup = observer((props: Props) => {
 
           <div className="w-[960px] flex-1text-gray-6d mb-8 bg-white">
             {
-              state.localGroups.map((group: IGroup & { role: string, profile: any, profileTag: string }) => (
+              state.localGroups.map((group: IGroup) => (
                 <div
                   key={group.group_id}
                   className={classNames(
