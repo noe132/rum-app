@@ -104,11 +104,14 @@ export default observer((props: IProps) => {
             >
               {outOfFolderGroups.map((group, index) => (
                 <Draggable key={group.group_id} draggableId={group.group_id} index={index}>
-                  {(provided) => (
+                  {(provided, snapshot) => (
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
+                      className={classNames({
+                        'opacity-40': snapshot.isDragging,
+                      })}
                     >
                       <GroupItem
                         group={group}
@@ -165,11 +168,14 @@ export default observer((props: IProps) => {
                   />
                   {groupFolder.expand && state.groups.filter((group) => groupFolder.items.includes(group.group_id)).map((group, index) => (
                     <Draggable key={group.group_id} draggableId={group.group_id} index={index}>
-                      {(provided) => (
+                      {(provided, snapshot) => (
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
+                          className={classNames({
+                            'opacity-40': snapshot.isDragging,
+                          })}
                         >
                           <GroupItem
                             group={group}
