@@ -415,6 +415,10 @@ export const content = {
   sidebarIconStyleMode: '图标模式',
   sidebarListStyleMode: '列表管理模式',
   updateAt: '更新于',
+  initProfile: '初始化资料',
+  initProfileTitle: '即将加入种子网络:',
+  selectProfile: '请选择应用到该种子网络的身份资料',
+  selectProfileFromDropdown: '下拉选择身份资料',
 };
 
 export type Content = typeof content;
