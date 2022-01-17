@@ -42,7 +42,7 @@ export default observer((props: Props) => {
 
   const state = useLocalObservable(() => ({
     showMenu: false,
-    selectedProfile: { profile: { name: '', avatar: '' } },
+    selectedProfile: null as any,
   }));
 
   const selector = React.useRef<HTMLDivElement>(null);
@@ -54,7 +54,7 @@ export default observer((props: Props) => {
     const p = editProfile({ groupIds, profile });
     const newProfile = await p;
     if (newProfile) {
-      state.selectedProfile = { profile: newProfile };
+      state.selectedProfile = { profile: newProfile, profileTag: newProfile.name + newProfile.avatar };
       if (onSelect) {
         onSelect(newProfile);
       }
@@ -98,7 +98,9 @@ export default observer((props: Props) => {
                 state.selectedProfile ? (
                   <img className="ml-[-16px] flex-shrink-0 flex items-center justify-center box-border border border-gray-f2 w-[32px] h-[32px] bg-white rounded-full overflow-hidden" src={state.selectedProfile.profile.avatar} />
                 ) : (
-                  <HiOutlineUser />
+                  <div className="ml-[-16px] flex-shrink-0 flex items-center justify-center box-border border border-gray-f2 w-[32px] h-[32px] bg-white rounded-full overflow-hidden">
+                    <HiOutlineUser className="text-26 text-gray-f2" />
+                  </div>
                 )
               }
               {
@@ -162,14 +164,14 @@ export default observer((props: Props) => {
               key={profile.profileTag}
               className={classNames(
                 'pl-1 px-2.5 h-[26px] flex items-center rounded gap-x-2 cursor-pointer',
-                selected === profile.profileTag ? 'bg-black text-white' : 'bg-gray-f2 text-gray-4a',
+                state.selectedProfile?.profileTag === profile.profileTag ? 'bg-black text-white' : 'bg-gray-f2 text-gray-4a',
               )}
               onClick={() => handleEdit(profile.profile)}
             >
               <div
                 className={classNames(
                   'flex-shrink-0 mr-1 flex items-center justify-center box-border w-[30px] h-[30px] bg-white border-2 rounded-full overflow-hidden',
-                  selected === profile.profileTag ? 'border-white' : 'border-gray-f2',
+                  state.selectedProfile?.profileTag === profile.profileTag ? 'border-white' : 'border-gray-f2',
                 )}
               >
                 <img src={profile.profile.avatar} />
@@ -178,12 +180,12 @@ export default observer((props: Props) => {
               <div
                 className={classNames(
                   'text-12 flex-grow',
-                  selected === profile.profileTag ? 'text-white' : 'text-gray-9c',
+                  state.selectedProfile?.profileTag === profile.profileTag ? 'text-white' : 'text-gray-9c',
                 )}
               >{profile.count}</div>
               <img
                 className="flex-shrink-0"
-                src={selected === profile.profileTag ? AddWhiteIcon : AddGrayIcon}
+                src={state.selectedProfile?.profileTag === profile.profileTag ? AddWhiteIcon : AddGrayIcon}
                 alt={lang.create}
               />
             </div>

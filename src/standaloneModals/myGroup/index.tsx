@@ -24,7 +24,7 @@ import { GROUP_TEMPLATE_TYPE, GROUP_TEMPLATE_TYPE_NAME, GROUP_TEMPLATE_TYPE_ICON
 import { format } from 'date-fns';
 import Filter from './filter';
 import ProfileSelector from 'components/profileSelector';
-import MixinUIDSelector from './mixinUIDSelector';
+import MixinUIDSelector from 'components/mixinUIDSelector';
 import Order from './order';
 import { useLeaveGroup } from 'hooks/useLeaveGroup';
 import Help from 'layouts/Main/Help';
