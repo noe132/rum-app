@@ -303,7 +303,7 @@ export const content = {
   canDisplayedBlock: 'An error occurred, the content cannot be displayed normally',
   searchText: 'Please enter the keywords',
   confirmToFollow: 'Are you sure you want to view posts from this member? ',
-  blockList: 'Muted',
+  mutedList: 'Muted',
   cancelBlock: 'unmute',
   confirmToClearCacheData: 'Are you sure to clear cache data of this app? ',
   expand: 'Expand',

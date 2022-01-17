@@ -14,7 +14,6 @@ import Welcome from './Welcome';
 import Feed from 'layouts/Main/Feed';
 import useQueryObjects from 'hooks/useQueryObjects';
 import useDatabase from 'hooks/useDatabase';
-import useOffChainDatabase from 'hooks/useOffChainDatabase';
 import useSetupQuitHook from 'hooks/useSetupQuitHook';
 import Loading from 'components/Loading';
 import Fade from '@material-ui/core/Fade';
@@ -37,7 +36,6 @@ export default observer(() => {
   const { activeGroupStore, groupStore, nodeStore, authStore, commentStore, latestStatusStore } = useStore();
   const activeGroup = useActiveGroup();
   const database = useDatabase();
-  const offChainDatabase = useOffChainDatabase();
   const queryObjects = useQueryObjects();
   const checkGroupProfile = useCheckGroupProfile();
   const scrollRef = React.useRef<HTMLDivElement>(null);
@@ -70,13 +68,6 @@ export default observer(() => {
 
       activeGroupStore.setObjectsFilter({
         type: ObjectsFilterType.ALL,
-      });
-
-      await activeGroupStore.fetchFollowings(offChainDatabase, {
-        groupId: activeGroupStore.id,
-      });
-      await activeGroupStore.fetchBlockList(offChainDatabase, {
-        groupId: activeGroupStore.id,
       });
 
       await Promise.all([

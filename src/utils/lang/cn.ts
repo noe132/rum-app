@@ -303,7 +303,7 @@ export const content = {
   canDisplayedBlock: '出错了，内容无法正常显示出来',
   searchText: '请输入要搜索的内容',
   confirmToFollow: '确定要显示 Ta 的内容吗？',
-  blockList: '已静音的成员',
+  mutedList: '已静音的成员',
   cancelBlock: '取消静音',
   confirmToClearCacheData: '确定清除客户端的缓存数据吗？',
   expand: '展开',
