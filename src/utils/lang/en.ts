@@ -415,4 +415,13 @@ export const content = {
   selectProfileFromDropdown: 'Select Profile from Dropdown',
   selectMixinUID: 'Select Wallet for New SeedNet',
   selectMixinUIDFromDropdown: 'Select Wallet from Dropdown',
+  changeFontSize: 'Change Font Size',
+  small: 'Small',
+  normal: 'Normal',
+  large: 'Large',
+  youSelected: 'You Selected ',
+  smallSizeFont: 'Small Size',
+  normalSizeFont: 'Normal Size',
+  largeSizeFont: 'Large Size',
+  extraLargeSizeFont: 'Extra Large Size',
 };

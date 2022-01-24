@@ -135,7 +135,7 @@ const Images = (props: {
 
 export default observer((props: IProps) => {
   const { object } = props;
-  const { activeGroupStore, authStore } = useStore();
+  const { activeGroupStore, authStore, fontStore } = useStore();
   const activeGroup = useActiveGroup();
   const isGroupOwner = useIsGroupOwner(activeGroup);
   const hasPermission = useHasPermission(object.Publisher);
@@ -258,6 +258,7 @@ export default observer((props: IProps) => {
                     fold: !state.expandContent,
                   },
                   'mt-[8px] text-gray-4a break-all whitespace-pre-wrap tracking-wide',
+                  'text-' + fontStore.fontSize,
                 )}
                 dangerouslySetInnerHTML={{
                   __html: hasPermission
