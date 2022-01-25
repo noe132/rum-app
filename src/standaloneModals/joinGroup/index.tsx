@@ -56,6 +56,7 @@ const JoinGroup = observer((props: Props) => {
   const {
     activeGroupStore,
     snackbarStore,
+    groupStore,
   } = useStore();
   const joinGroupProcess = useJoinGroup();
 
@@ -96,6 +97,13 @@ const JoinGroup = observer((props: Props) => {
         handleClose();
         if (activeGroupStore.id !== seed.group_id) {
           await sleep(400);
+          if (!groupStore.hasGroup(seed.group_id)) {
+            snackbarStore.show({
+              message: lang.existMember,
+              type: 'error',
+            });
+            return;
+          }
           activeGroupStore.setSwitchLoading(true);
           activeGroupStore.setId(seed.group_id);
         }
