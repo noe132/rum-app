@@ -14,17 +14,13 @@ import Welcome from './Welcome';
 import Feed from 'layouts/Main/Feed';
 import useQueryObjects from 'hooks/useQueryObjects';
 import useDatabase from 'hooks/useDatabase';
-import useOffChainDatabase from 'hooks/useOffChainDatabase';
 import useSetupQuitHook from 'hooks/useSetupQuitHook';
-import useSetupCleanLocalData from 'hooks/useSetupCleanLocalData';
 import Loading from 'components/Loading';
 import Fade from '@material-ui/core/Fade';
 import { ObjectsFilterType } from 'store/activeGroup';
 import CommentReplyModal from 'components/CommentReplyModal';
 import * as PersonModel from 'hooks/useDatabase/models/person';
-import getSortedGroups from 'store/selectors/getSortedGroups';
 import useActiveGroup from 'store/selectors/useActiveGroup';
-import useCheckGroupProfile from 'hooks/useCheckGroupProfile';
 import { lang } from 'utils/lang';
 import { GROUP_TEMPLATE_TYPE } from 'utils/constant';
 import * as MainScrollView from 'utils/mainScrollView';
@@ -35,12 +31,10 @@ export default observer(() => {
   const state = useLocalObservable(() => ({
     scrollTopLoading: false,
   }));
-  const { activeGroupStore, groupStore, nodeStore, authStore, commentStore, latestStatusStore } = useStore();
+  const { activeGroupStore, groupStore, nodeStore, authStore, commentStore, latestStatusStore, sidebarStore } = useStore();
   const activeGroup = useActiveGroup();
   const database = useDatabase();
-  const offChainDatabase = useOffChainDatabase();
   const queryObjects = useQueryObjects();
-  const checkGroupProfile = useCheckGroupProfile();
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
   UsePolling();
@@ -48,7 +42,6 @@ export default observer(() => {
   UseAppBadgeCount();
   useExportToWindow();
   useSetupQuitHook();
-  useSetupCleanLocalData();
 
   React.useEffect(() => {
     activeGroupStore.clearAfterGroupChanged();
@@ -61,9 +54,9 @@ export default observer(() => {
 
       if (!activeGroupStore.id) {
         if (groupStore.groups.length > 0) {
-          const sortedGroups = getSortedGroups(groupStore.groups, latestStatusStore.map);
-          const firstGroup = sortedGroups[0];
-          activeGroupStore.setId(firstGroup.group_id);
+          const { defaultGroupFolder } = sidebarStore;
+          const firstGroup = groupStore.groups[0];
+          activeGroupStore.setId(defaultGroupFolder && defaultGroupFolder.items[0] ? defaultGroupFolder.items[0] : firstGroup.group_id);
         }
         return;
       }
@@ -72,13 +65,6 @@ export default observer(() => {
 
       activeGroupStore.setObjectsFilter({
         type: ObjectsFilterType.ALL,
-      });
-
-      await activeGroupStore.fetchFollowings(offChainDatabase, {
-        groupId: activeGroupStore.id,
-      });
-      await activeGroupStore.fetchBlockList(offChainDatabase, {
-        groupId: activeGroupStore.id,
       });
 
       await Promise.all([
@@ -116,8 +102,6 @@ export default observer(() => {
       activeGroupStore.setSwitchLoading(false);
 
       fetchDeniedList(activeGroupStore.id);
-
-      checkGroupProfile(activeGroupStore.id);
     })();
 
     async function fetchDeniedList(groupId: string) {
@@ -197,15 +181,11 @@ export default observer(() => {
 
   async function fetchPerson() {
     try {
-      const [user, latestPersonStatus] = await database.transaction(
+      const [user] = await database.transaction(
         'r',
         database.persons,
         () => Promise.all([
           PersonModel.getUser(database, {
-            GroupId: activeGroupStore.id,
-            Publisher: activeGroup.user_pubkey,
-          }),
-          PersonModel.getLatestPersonStatus(database, {
             GroupId: activeGroupStore.id,
             Publisher: activeGroup.user_pubkey,
           }),
@@ -214,7 +194,6 @@ export default observer(() => {
 
       activeGroupStore.setProfile(user.profile);
       activeGroupStore.updateProfileMap(activeGroup.user_pubkey, user.profile);
-      activeGroupStore.setLatestPersonStatus(latestPersonStatus);
     } catch (err) {
       console.log(err);
     }

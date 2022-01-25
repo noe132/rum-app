@@ -1,19 +1,25 @@
 import React from 'react';
 import { ipcRenderer } from 'electron';
 import { observer, useLocalObservable } from 'mobx-react-lite';
-import Dialog from 'components/Dialog';
-import Button from 'components/Button';
-import { useStore } from 'store';
 import copy from 'copy-to-clipboard';
 import { app } from '@electron/remote';
+import Tooltip from '@material-ui/core/Tooltip';
+
+import Dialog from 'components/Dialog';
+import Button from 'components/Button';
 import MiddleTruncate from 'components/MiddleTruncate';
+
+import { useStore } from 'store';
+
+import sleep from 'utils/sleep';
+import { lang } from 'utils/lang';
+import formatPath from 'utils/formatPath';
+
+import useCloseNode from 'hooks/useCloseNode';
+import useResetNode from 'hooks/useResetNode';
+
 import NetworkInfoModal from './NetworkInfoModal';
 import NodeParamsModal from './NodeParamsModal';
-import Tooltip from '@material-ui/core/Tooltip';
-import sleep from 'utils/sleep';
-import formatPath from 'utils/formatPath';
-import useExitNode from 'hooks/useExitNode';
-import { lang } from 'utils/lang';
 
 const MyNodeInfo = observer(() => {
   const {
@@ -29,7 +35,8 @@ const MyNodeInfo = observer(() => {
     showNodeParamsModal: false,
   }));
 
-  const exitNode = useExitNode();
+  const closeNode = useCloseNode();
+  const resetNode = useResetNode();
 
   const onExitNode = React.useCallback(() => {
     confirmDialogStore.show({
@@ -37,15 +44,18 @@ const MyNodeInfo = observer(() => {
       okText: lang.yes,
       isDangerous: true,
       ok: async () => {
+        if (!process.env.IS_ELECTRON) {
+          return;
+        }
         ipcRenderer.send('disable-app-quit-prompt');
         confirmDialogStore.setLoading(true);
         await sleep(800);
         confirmDialogStore.hide();
         modalStore.myNodeInfo.close();
         if (nodeStore.mode === 'INTERNAL') {
-          await exitNode();
+          await closeNode();
         }
-        nodeStore.resetNode();
+        resetNode();
         await sleep(300);
         window.location.reload();
       },
@@ -89,21 +99,24 @@ const MyNodeInfo = observer(() => {
             </div>
           </div>
         )}
-        <div className="mt-6">
-          <div className="text-gray-500 font-bold opacity-90">{lang.storageDir}</div>
-          <div className="mt-2 text-12 text-gray-500 bg-gray-100 border border-gray-200 rounded-0 py-2 px-4">
-            <Tooltip
-              placement="top"
-              title={nodeStore.storagePath}
-              arrow
-              interactive
-            >
-              <div className="tracking-wide">
-                {formatPath(nodeStore.storagePath, { truncateLength: 27 })}
-              </div>
-            </Tooltip>
+        {process.env.IS_ELECTRON && (
+          <div className="mt-6">
+            <div className="text-gray-500 font-bold opacity-90">{lang.storageDir}</div>
+            <div className="mt-2 text-12 text-gray-500 bg-gray-100 border border-gray-200 rounded-0 py-2 px-4">
+              <Tooltip
+                placement="top"
+                title={nodeStore.storagePath}
+                arrow
+                interactive
+              >
+                <div className="tracking-wide">
+                  {formatPath(nodeStore.storagePath, { truncateLength: 27 })}
+                </div>
+              </Tooltip>
+            </div>
           </div>
-        </div>
+        )}
+
         <div className="mt-6">
           <div className="text-gray-500 font-bold opacity-90">{lang.detail}</div>
           <div className="mt-2 flex items-center justify-center text-12 text-gray-500 bg-gray-100 border border-gray-200 rounded-0 py-2 px-4">
@@ -115,16 +128,20 @@ const MyNodeInfo = observer(() => {
               interactive
               arrow
             >
-              <div>{lang.version} {app.getVersion()}</div>
+              <div>{lang.version} {process.env.IS_ELECTRON ? app.getVersion() : ''}</div>
             </Tooltip>
             <div className="px-4">|</div>
-            <div
-              className="flex items-center hover:font-bold cursor-pointer"
-              onClick={() => { state.showNodeParamsModal = true; }}
-            >
-              {lang.nodeParams}
-            </div>
-            <div className="px-4">|</div>
+
+            {process.env.IS_ELECTRON && (<>
+              <div
+                className="flex items-center hover:font-bold cursor-pointer"
+                onClick={() => { state.showNodeParamsModal = true; }}
+              >
+                {lang.nodeParams}
+              </div>
+              <div className="px-4">|</div>
+            </>)}
+
             <div
               className="flex items-center hover:font-bold cursor-pointer"
               onClick={() => { state.showNetworkInfoModal = true; }}
@@ -133,11 +150,13 @@ const MyNodeInfo = observer(() => {
             </div>
           </div>
         </div>
-        <div className="mt-8">
-          <Button fullWidth color="red" outline onClick={onExitNode}>
-            {lang.exitNode}
-          </Button>
-        </div>
+        {process.env.IS_ELECTRON && (
+          <div className="mt-8">
+            <Button fullWidth color="red" outline onClick={onExitNode}>
+              {lang.exitNode}
+            </Button>
+          </div>
+        )}
       </div>
       <NetworkInfoModal
         open={state.showNetworkInfoModal}

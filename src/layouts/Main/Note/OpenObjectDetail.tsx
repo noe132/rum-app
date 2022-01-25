@@ -1,7 +1,8 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import classNames from 'classnames';
 import { observer, useLocalObservable } from 'mobx-react-lite';
-import { StoreProvider } from 'store';
+import { StoreProvider, useStore } from 'store';
 import { IDbDerivedObjectItem } from 'hooks/useDatabase/models/object';
 import Dialog from 'components/Dialog';
 import useGroupChange from 'hooks/useGroupChange';
@@ -59,7 +60,9 @@ const Images = (props: {
               background: `url(${url}) center center / cover no-repeat rgba(64, 64, 64, 0.6)`,
             }}
             onClick={onClick}
-          />
+          >
+            <img className="w-full h-full opacity-0" src={url} alt="" />
+          </div>
         </div>
       );
     })}
@@ -76,6 +79,8 @@ const PostDetail = observer((props: {
   }));
   const { object } = props;
   const { content, image } = object.Content;
+
+  const { fontStore } = useStore();
 
   const close = () => {
     state.open = false;
@@ -104,7 +109,10 @@ const PostDetail = observer((props: {
         <div className="w-[650px]">
           <div className="p-10">
             <div
-              className='text-gray-4a break-all whitespace-pre-wrap tracking-wider post-content'
+              className={classNames(
+                'text-gray-4a break-all whitespace-pre-wrap tracking-wider post-content',
+                'text-' + fontStore.fontSize,
+              )}
               dangerouslySetInnerHTML={{
                 __html: content,
               }}
