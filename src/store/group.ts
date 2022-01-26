@@ -3,6 +3,8 @@ import { observable, runInAction } from 'mobx';
 import useIsGroupOwner from 'store/selectors/useIsGroupOwner';
 import * as PersonModel from 'hooks/useDatabase/models/person';
 import Database from 'hooks/useDatabase/database';
+import ContentApi, { IProfilePayload } from 'apis/content';
+import { ContentStatus } from 'hooks/useDatabase/contentStatus';
 
 type IHasAnnouncedProducersMap = Record<string, boolean>;
 
@@ -68,6 +70,28 @@ export function createGroupStore() {
           group.profileTag = '';
         }
         this.updateGroup(group.group_id, group);
+        if (result && result.status === ContentStatus.waiting && group.group_status === GroupStatus.IDLE) {
+          const payload = {
+            type: 'Update',
+            person: result.person.Content,
+            target: {
+              id: group.group_id,
+              type: 'Group',
+            },
+          } as IProfilePayload;
+          let res;
+          try {
+            res = await ContentApi.updateProfile(payload);
+          } catch (e) {
+            return;
+          }
+          PersonModel.bulkPut(db, [{
+            ...result.person,
+            TrxId: res.trx_id,
+            Status: ContentStatus.syncing,
+            TimeStamp: Date.now() * 1000000,
+          }]);
+        }
       });
     },
 

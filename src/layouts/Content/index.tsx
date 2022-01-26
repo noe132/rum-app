@@ -193,6 +193,7 @@ export default observer(() => {
 
       activeGroupStore.setProfile(user.profile);
       activeGroupStore.updateProfileMap(activeGroup.user_pubkey, user.profile);
+      groupStore.updateProfile(database, activeGroupStore.id);
     } catch (err) {
       console.log(err);
     }
