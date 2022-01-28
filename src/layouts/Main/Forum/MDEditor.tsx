@@ -145,6 +145,7 @@ export const MDEditor = observer((props: Props) => {
         placeholderWidth={90}
         editorPlaceholderWidth={200}
         imageUrl=""
+        useOriginImage
         getImageUrl={async (url: string) => {
           if (!state.editor) {
             return;
@@ -162,7 +163,6 @@ export const MDEditor = observer((props: Props) => {
               },
             ],
           });
-          console.log({ attributedTo });
           if (!attributedTo) {
             return;
           }

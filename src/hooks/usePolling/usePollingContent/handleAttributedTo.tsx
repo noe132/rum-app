@@ -44,7 +44,6 @@ export default async (options: IOptions) => {
           trxIdsToMarkAsynced.push(existAttributedTo.TrxId);
         });
 
-        console.log({ itemsToAdd, trxIdsToMarkAsynced });
         await Promise.all([
           AttributedToModel.bulkAdd(database, itemsToAdd),
           AttributedToModel.bulkMarkAsSynced(database, trxIdsToMarkAsynced),
