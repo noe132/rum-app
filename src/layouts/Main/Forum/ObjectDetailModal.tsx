@@ -42,11 +42,17 @@ const PostDetail = observer(() => {
     })();
   }, []);
 
+  const object = activeGroupStore.objectMap[objectTrxId];
+
+  React.useEffect(() => {
+    if (state.isFetched && !object) {
+      modalStore.forumObjectDetail.hide();
+    }
+  }, [object]);
+
   if (!state.isFetched) {
     return null;
   }
-
-  const object = activeGroupStore.objectMap[objectTrxId];
 
   if (!object) {
     return null;
