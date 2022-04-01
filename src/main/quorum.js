@@ -179,8 +179,6 @@ const actions = {
       `${storagePath}/keystore`,
       '-datadir',
       `${storagePath}/peerData`,
-      '-debug',
-      'true',
     ];
     const command = [cmd, ...args].join(' ');
 
@@ -189,16 +187,29 @@ const actions = {
     console.log(args);
 
     return new Promise((resovle, reject) => {
-      childProcess.exec(command, (err, stdout, stderr) => {
-        if (err) {
-          reject(err);
-          return;
+      const exportProcess = childProcess.spawn(cmd, args, {
+        cwd: quorumBaseDir,
+      });
+
+      exportProcess.on('error', (err) => {
+        reject(err);
+        console.error(err);
+      });
+
+      const handleData = (data) => {
+        state.logs += data;
+        if (state.logs.length > 1.5 * 1024 ** 2) {
+          state.logs = state.logs.slice(1.5 * 1024 ** 2 - state.logs.length);
         }
-        if (stderr && stderr.includes('FATAL')) {
-          reject(new Error(stderr));
-          return;
+      };
+      exportProcess.stdout.on('data', handleData);
+      exportProcess.stderr.on('data', handleData);
+      exportProcess.on('close', (code) => {
+        if (code === 0) {
+          resovle('success');
+        } else {
+          reject(new Error(state.logs));
         }
-        resovle('success');
       });
     });
   },
@@ -221,8 +232,6 @@ const actions = {
       `${storagePath}/keystore`,
       '-datadir',
       `${storagePath}/peerData`,
-      '-debug',
-      'true',
     ];
     const command = [cmd, ...args].join(' ');
 
@@ -231,16 +240,29 @@ const actions = {
     console.log(args);
 
     return new Promise((resovle, reject) => {
-      childProcess.exec(command, (err, stdout, stderr) => {
-        if (err) {
-          reject(err);
-          return;
+      const importProcess = childProcess.spawn(cmd, args, {
+        cwd: quorumBaseDir,
+      });
+
+      importProcess.on('error', (err) => {
+        reject(err);
+        console.error(err);
+      });
+
+      const handleData = (data) => {
+        state.logs += data;
+        if (state.logs.length > 1.5 * 1024 ** 2) {
+          state.logs = state.logs.slice(1.5 * 1024 ** 2 - state.logs.length);
         }
-        if (stderr && stderr.includes('FATAL')) {
-          reject(new Error(stderr));
-          return;
+      };
+      importProcess.stdout.on('data', handleData);
+      importProcess.stderr.on('data', handleData);
+      importProcess.on('close', (code) => {
+        if (code === 0) {
+          resovle('success');
+        } else {
+          reject(new Error(state.logs));
         }
-        resovle('success');
       });
     });
   },
