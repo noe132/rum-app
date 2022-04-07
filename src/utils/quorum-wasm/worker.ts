@@ -10,10 +10,18 @@ declare global {
 
 const init = async () => {
   const go = new Go();
-  const r = await WebAssembly.instantiateStreaming(fetch(quorumWasmUrl), go.importObject);
+  if ('instantiateStreaming' in WebAssembly) {
+    const r = await WebAssembly.instantiateStreaming(fetch(quorumWasmUrl), go.importObject);
 
-  go.run(r.instance);
-  globalThis.postMessage('inited');
+    go.run(r.instance);
+    globalThis.postMessage('inited');
+  } else if ('instantiate' in WebAssembly) {
+    const wasm = await fetch(quorumWasmUrl);
+    const r = await WebAssembly.instantiate(await wasm.arrayBuffer(), go.importObject);
+
+    go.run(r.instance);
+    globalThis.postMessage('inited');
+  }
 };
 
 const shim = {
@@ -33,13 +41,21 @@ const shim = {
   },
 };
 
+declare const API_LOGGING: string;
+
 globalThis.addEventListener('message', async (e) => {
   try {
     const data = e.data;
     const { method, args, id } = data;
-    const promise = method in shim
-      ? (shim as any)[method](...args)
-      : (globalThis as any)[method](...args);
+    const wasmMethod = method in shim
+      ? (shim as any)[method]
+      : (globalThis as any)[method];
+
+    if (!wasmMethod) {
+      throw new Error(`method ${method} was not found`);
+    }
+
+    const promise = wasmMethod(...args);
 
     const result = await promise.then((res: any) => {
       const data = 'data' in res ? res.data : res;
@@ -48,6 +64,9 @@ globalThis.addEventListener('message', async (e) => {
       console.error(error);
       return { error };
     });
+    if (typeof API_LOGGING !== 'undefined' && API_LOGGING) {
+      console.log(method, args, result);
+    }
     globalThis.postMessage({
       ...result,
       id,

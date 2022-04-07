@@ -28,6 +28,7 @@ import * as MainScrollView from 'utils/mainScrollView';
 import GroupIcon from 'components/GroupIcon';
 import ago from 'utils/ago';
 import classNames from 'classnames';
+import { isNoteGroup } from 'store/selectors/group';
 
 export default observer(() => {
   const { activeGroupStore, nodeStore, groupStore } = useStore();
@@ -132,7 +133,7 @@ export default observer(() => {
           </span>
           <div className="mt-[2px] ml-[-2px] text-12 transform scale-90 flex items-center opacity-90">
             <span className="text-gray-9c">
-              {ago(activeGroup.last_updated)}更新
+              {lang.updatedAt(ago(activeGroup.last_updated))}
             </span>
             <Tooltip
               enterDelay={800}
@@ -201,7 +202,7 @@ export default observer(() => {
       </div>
       {!activeGroupStore.searchActive && (
         <div className="flex items-center">
-          {!activeGroupStore.switchLoading && state.profile && (
+          {!activeGroupStore.switchLoading && state.profile && !activeGroupStore.paidRequired && (
             <Fade in={true} timeout={500}>
               <div className="mr-4 flex items-center gap-x-7">
                 {isPostOrTimeline && (
@@ -229,13 +230,15 @@ export default observer(() => {
                     {lang.createBlock}
                   </div>
                 </Badge>
-                <div
-                  className="flex flex-center text-link-blue cursor-pointer text-16 opacity-80"
-                  onClick={() => shareGroup(activeGroup.group_id)}
-                >
-                  <HiOutlineShare className="text-16 mr-[6px]" />
-                  {lang.share}
-                </div>
+                {!isNoteGroup(activeGroup) && (
+                  <div
+                    className="flex flex-center text-link-blue cursor-pointer text-16 opacity-80"
+                    onClick={() => shareGroup(activeGroup.group_id)}
+                  >
+                    <HiOutlineShare className="text-16 mr-[6px]" />
+                    {lang.share}
+                  </div>
+                )}
                 {isPostOrTimeline && (
                   <div className="flex items-center">
                     <Avatar

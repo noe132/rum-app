@@ -31,6 +31,10 @@ export const WASMBootstrap = observer((props: Props) => {
     props.onConfirm(state.bootstraps);
   });
 
+  const handleRestoreDefault = action(() => {
+    state.bootstraps = [...wsBootstraps];
+  });
+
   React.useEffect(() => {
     const item = localStorage.getItem(WASM_BOOTSTRAP_STORAGE_KEY) ?? '';
     try {
@@ -66,8 +70,11 @@ export const WASMBootstrap = observer((props: Props) => {
           </div>
         ))}
         <div className="mt-4">
+          <Button className="mr-4" onClick={handleRestoreDefault}>
+            {lang.restoreDefault}
+          </Button>
           <Button onClick={action(() => state.bootstraps.push(''))}>
-            添加
+            {lang.add}
           </Button>
         </div>
         <div className="mt-6" onClick={handleSubmit}>

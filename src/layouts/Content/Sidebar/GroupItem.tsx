@@ -7,16 +7,14 @@ import escapeStringRegexp from 'escape-string-regexp';
 import { Badge, Popover } from '@material-ui/core';
 
 import { useStore } from 'store';
-import { GROUP_TEMPLATE_TYPE } from 'utils/constant';
-import TimelineIcon from 'assets/template/template_icon_timeline.svg?react';
-import PostIcon from 'assets/template/template_icon_post.svg?react';
-import NotebookIcon from 'assets/template/template_icon_notebook.svg?react';
 import { IGroup } from 'apis/group';
 import GroupIcon from 'components/GroupIcon';
+import { getGroupIcon } from 'utils/getGroupIcon';
 
 import { GroupPopup } from './GroupPopup';
 import { ListType } from './ListTypeSwitcher';
 import { sortableState } from './sortableState';
+import { isGroupOwner } from 'store/selectors/group';
 
 interface GroupItemProps {
   group: IGroup
@@ -38,17 +36,13 @@ export default observer((props: GroupItemProps) => {
   const latestStatus = latestStatusStore.map[group.group_id] || latestStatusStore.DEFAULT_LATEST_STATUS;
   const unreadCount = latestStatus.unreadCount;
   const isCurrent = activeGroupStore.id === group.group_id;
-  const GroupTypeIcon = {
-    [GROUP_TEMPLATE_TYPE.TIMELINE]: TimelineIcon,
-    [GROUP_TEMPLATE_TYPE.POST]: PostIcon,
-    [GROUP_TEMPLATE_TYPE.NOTE]: NotebookIcon,
-  }[group.app_key] || TimelineIcon;
+  const GroupTypeIcon = getGroupIcon(group.app_key);
   const isTextListType = props.listType === ListType.text;
   const isIconListType = props.listType === ListType.icon;
   const showNotificationBadge = !isCurrent
     && unreadCount === 0
     && (sum(Object.values(latestStatus.notificationUnreadCountMap || {})) > 0);
-  const isOwner = group.role === 'owner';
+  const isOwner = isGroupOwner(group);
 
   React.useEffect(() => reaction(
     () => [state.groupPopupOpen],
@@ -161,7 +155,7 @@ export default observer((props: GroupItemProps) => {
           </div>
           <div className="flex items-center">
             <GroupIcon width={24} height={24} fontSize={14} groupId={group.group_id} colorClassName={isCurrent ? 'text-gray-33' : ''} className="rounded-6 mr-2 w-6" />
-            <div className="py-1 font-medium truncate max-w-36 text-14">
+            <div className="py-1 font-medium truncate max-w-38 text-14">
               {!props.highlight && group.group_name}
               {!!props.highlight && highlightGroupName(group.group_name, props.highlight).map((v, i) => (
                 <span className={classNames(v.type === 'highlight' && 'text-highlight-green')} key={i}>
