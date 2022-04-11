@@ -419,6 +419,9 @@ export const content = {
   invalidInput: (name: string) => `请输入正确的${name}`,
   publisher: '用户 ID',
   retryCount: '重试次数',
+  exportNode: '节点导出',
+  importNode: '节点导入',
+  language: 'Language',
 };
 
 export type Content = typeof content;
