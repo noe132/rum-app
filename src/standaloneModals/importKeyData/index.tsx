@@ -5,8 +5,9 @@ import fs from 'fs-extra';
 import { dialog, getCurrentWindow } from '@electron/remote';
 import { observer, useLocalObservable } from 'mobx-react-lite';
 import { action, runInAction } from 'mobx';
-import { TextField, Tooltip } from '@material-ui/core';
+import { Tooltip } from '@material-ui/core';
 import { MdDone } from 'react-icons/md';
+import PasswordInput from 'components/PasswordInput';
 
 import Dialog from 'components/Dialog';
 import Button from 'components/Button';
@@ -367,7 +368,7 @@ const ImportKeyData = observer((props: Props) => {
                 <div className="text-18 font-bold text-gray-700">{ lang.enterPassword }</div>
                 <div className="mt-4 pt-2" />
                 <div className="mt-1">
-                  <TextField
+                  <PasswordInput
                     className="w-full"
                     placeholder={lang.password}
                     size="small"
