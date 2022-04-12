@@ -1,14 +1,14 @@
 {
-    "hash": "e9ea32d40371b21317261af3702a82a2727de9e1",
-    "date": "2022-03-28T02:07:00+08:00",
+    "hash": "80e4c47ea895dfe17d201c64b9b2f5a6abf46a43",
+    "date": "2022-04-12T23:33:18+08:00",
     "commit": {
-        "hash": "e9ea32d40371b21317261af3702a82a2727de9e1",
-        "date": "2022-03-28T02:07:00+08:00",
-        "message": "Translation and some terminology",
-        "refs": "HEAD -> pr/4, origin/pr/4",
+        "hash": "80e4c47ea895dfe17d201c64b9b2f5a6abf46a43",
+        "date": "2022-04-12T23:33:18+08:00",
+        "message": "Merge branch 'develop' into develop",
+        "refs": "HEAD -> pr/7, origin/pr/7",
         "body": "",
         "author_name": "hawken",
         "author_email": "askhaokun@gmail.com"
     },
-    "mirrored": "2022-03-27T18:22:56.743Z"
+    "mirrored": "2022-04-12T15:34:27.851Z"
 }
