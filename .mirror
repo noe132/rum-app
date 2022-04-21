@@ -1,14 +1,14 @@
 {
-    "hash": "1179a271a1e2191a2d44c3cffff22bd93d1c6da4",
-    "date": "2022-04-13T00:10:16+08:00",
+    "hash": "b5bd0b09438ad8756d3f188c84f91a70b09471d8",
+    "date": "2022-04-21T14:52:25+08:00",
     "commit": {
-        "hash": "1179a271a1e2191a2d44c3cffff22bd93d1c6da4",
-        "date": "2022-04-13T00:10:16+08:00",
-        "message": "Merge branch 'develop' of https://github.com/hawken-im/rum-app into develop",
-        "refs": "HEAD -> pr/7, origin/pr/7",
+        "hash": "b5bd0b09438ad8756d3f188c84f91a70b09471d8",
+        "date": "2022-04-21T14:52:25+08:00",
+        "message": "tweak: i18n typo error",
+        "refs": "HEAD -> pr/14, origin/pr/14",
         "body": "",
-        "author_name": "hawken",
-        "author_email": "askhaokun@gmail.com"
+        "author_name": "be-the-hero",
+        "author_email": "junhong@press.one"
     },
-    "mirrored": "2022-04-12T16:11:49.245Z"
+    "mirrored": "2022-04-21T07:06:39.695Z"
 }
