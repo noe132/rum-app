@@ -22,12 +22,18 @@ jobs:
       - name: Install Node.js, NPM and Yarn
         uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: 16
           cache: 'yarn'
 
       - name: Tests
         run: |
-          sudo apt-get install libgbm1
+          sudo apt-get update
+          sudo apt-get install -y libxkbfile-dev pkg-config libsecret-1-dev libxss1 dbus xvfb libgtk-3-0 libgbm1
+          sudo cp .erb/xvfb.init /etc/init.d/xvfb
+          sudo chmod +x /etc/init.d/xvfb
+          sudo update-rc.d xvfb defaults
+          sudo service xvfb start
+
           yarn
           yarn build:test
-          xvfb-run --auto-servernum --server-args='-screen 0, 1600x900x24' yarn test:prod
+          DISPLAY=:10 yarn test:prod

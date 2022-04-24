@@ -24,7 +24,7 @@ export const setup = async () => {
       devtool: 'true',
     },
     // dumpio: true,
-    args: ['--disable-gpu', '--headless', '.'],
+    args: ['.'],
     headless: true,
   });
   const pages = await app.pages();
