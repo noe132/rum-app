@@ -27,6 +27,7 @@ jobs:
 
       - name: Tests
         run: |
+          sudo apt-get install libgbm1
           yarn
           yarn build:test
-          yarn test:prod
+          xvfb-run --auto-servernum --server-args='-screen 0, 1600x900x24' yarn test:prod
