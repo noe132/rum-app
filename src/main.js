@@ -9,7 +9,6 @@ const { handleUpdate } = require('./main/updater');
 const MenuBuilder = require('./main/menu');
 const { sleep } = require('./main/utils');
 const path = require('path');
-const { lang } = require('utils/lang');
 
 remoteMain.initialize();
 
@@ -62,21 +61,21 @@ const main = () => {
         e.preventDefault();
         win.hide();
         if (process.platform === 'win32') {
-          const notice = !store.get('not-notice-when-close');
-          if (notice) {
-            try {
-              const res = await dialog.showMessageBox({
-                type: 'info',
-                buttons: [lang.yes],
-                title: lang.windowMinimize,
-                message: lang.runInBackground,
-                checkboxLabel: lang.doNotRemind,
-              });
-              if (res?.checkboxChecked) {
-                store.set('not-notice-when-close', true);
-              }
-            } catch {}
-          }
+          // const notice = !store.get('not-notice-when-close');
+          // if (notice) {
+          //   try {
+          //     const res = await dialog.showMessageBox({
+          //       type: 'info',
+          //       buttons: [lang.yes],
+          //       title: lang.windowMinimize,
+          //       message: lang.runInBackground,
+          //       checkboxLabel: lang.doNotRemind,
+          //     });
+          //     if (res?.checkboxChecked) {
+          //       store.set('not-notice-when-close', true);
+          //     }
+          //   } catch {}
+          // }
         }
       }
     });
