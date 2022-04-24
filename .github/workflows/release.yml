@@ -25,8 +25,7 @@ jobs:
           node-version: 14
           cache: 'yarn'
 
-      - name: Prepare for app notarization
-        if: startsWith(matrix.os, 'macos')
+      - name: Tests
         run: |
           yarn
           yarn build:test
