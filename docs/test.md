@@ -10,7 +10,7 @@ yarn test
 To run test with prod build
 ```sh
 yarn build:test
-yarn test
+yarn test:prod
 ```
 
 To run specific tests
