@@ -25,7 +25,7 @@ export const setup = async () => {
     },
     // dumpio: true,
     args: ['.'],
-    headless: false,
+    headless: true,
   });
   const pages = await app.pages();
   const [page] = pages;
