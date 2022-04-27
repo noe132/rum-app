@@ -102,6 +102,8 @@ export const content = {
   confirmToExit: 'Are you sure to leave this SeedNet?',
   confirmToExitAll: 'Are you sure to leave these SeedNets?',
   confirmToDelete: 'Are you sure to delete this SeedNet?',
+  leaveThisSeedNet: 'Leave this SeedNet',
+  leaveTheseSeedNets: 'Leave these SeedNets',
   settingDone: 'Setting successfully saved.',
   submittedWaitForSync: 'The request has been submitted, waiting for other nodes to synchronize',
   confirmToBan: 'Are you sure to ban this user from posting in this SeedNet?',

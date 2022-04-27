@@ -257,7 +257,7 @@ const ImportKeyData = observer((props: Props) => {
         handleClose();
       }}
     >
-      <div className="w-100 bg-white rounded-12 text-center p-8 pt-12 pb-8">
+      <div className="w-100 bg-white rounded-12 text-center px-8 pt-12 pb-8">
         <div>
           {
             state.step === 1 && (
@@ -272,6 +272,7 @@ const ImportKeyData = observer((props: Props) => {
                   <div className="mt-6">
                     <Button
                       className="rounded min-w-[160px] h-10"
+                      size="x-large"
                       color={state.backupPath ? 'green' : 'primary'}
                       isDoing={state.loadingKeyData}
                       onClick={async () => {
@@ -304,6 +305,7 @@ const ImportKeyData = observer((props: Props) => {
                 <div className="mt-6">
                   <Button
                     className="rounded min-w-[160px] h-10"
+                    size="x-large"
                     disabled={!state.backupPath}
                     onClick={submit}
                   >
@@ -324,6 +326,7 @@ const ImportKeyData = observer((props: Props) => {
                   {!state.storagePath && (
                     <Button
                       className="rounded min-w-[160px] h-10"
+                      size="x-large"
                       onClick={handleSelectDir}>
                       {lang.selectFolder}
                     </Button>
@@ -350,6 +353,7 @@ const ImportKeyData = observer((props: Props) => {
                       <div className="mt-6">
                         <Button
                           className="rounded min-w-[160px] h-10"
+                          size="x-large"
                           isDoing={state.loading}
                           isDone={state.done}
                           onClick={submit}
@@ -383,6 +387,7 @@ const ImportKeyData = observer((props: Props) => {
                 <div className="mt-6 mb-4 pt-[2px]">
                   <Button
                     className="rounded min-w-[160px] h-10"
+                    size="x-large"
                     disabled={!state.password}
                     isDoing={state.loading}
                     isDone={state.done}

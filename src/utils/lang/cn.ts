@@ -102,6 +102,8 @@ export const content = {
   confirmToExit: '确定要退出这个种子网络吗？',
   confirmToExitAll: '确定要退出这些种子网络吗？',
   confirmToDelete: '确定要删除这个种子网络吗？',
+  leaveThisSeedNet: '确认退出种子网络',
+  leaveTheseSeedNets: '确认退出种子网络',
   settingDone: '设置成功',
   submittedWaitForSync: '请求已提交，等待其他节点同步，即将生效',
   confirmToBan: '确定禁止 Ta 发布内容？',

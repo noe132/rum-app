@@ -330,6 +330,7 @@ const ExportKeyData = observer((props: Props) => {
                   {!state.storagePath && (
                     <Button
                       className="mt-12 rounded min-w-[160px] h-10"
+                      size="x-large"
                       onClick={handleSelectRumDir}
                     >
                       {lang.selectFolder}
@@ -357,6 +358,7 @@ const ExportKeyData = observer((props: Props) => {
                       <div className="mt-6">
                         <Button
                           className="rounded min-w-[160px] h-10"
+                          size="x-large"
                           isDoing={state.loading}
                           isDone={state.done}
                           onClick={submit}
@@ -381,6 +383,7 @@ const ExportKeyData = observer((props: Props) => {
                   {!state.backupPath && (
                     <Button
                       className="rounded min-w-[160px] h-10"
+                      size="x-large"
                       onClick={handleSelectDir}>
                       {lang.selectFolder}
                     </Button>
@@ -407,6 +410,7 @@ const ExportKeyData = observer((props: Props) => {
                       <div className="mt-6">
                         <Button
                           className="rounded min-w-[160px] h-10"
+                          size="x-large"
                           isDoing={state.loading}
                           isDone={state.done}
                           onClick={submit}
@@ -440,6 +444,7 @@ const ExportKeyData = observer((props: Props) => {
                 <div className="mt-6 mb-4 pt-[2px]">
                   <Button
                     className="rounded min-w-[160px] h-10"
+                    size="x-large"
                     disabled={!state.password}
                     isDoing={state.loading}
                     isDone={state.done}
