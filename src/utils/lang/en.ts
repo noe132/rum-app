@@ -506,4 +506,10 @@ export const content = {
   sureToPay: 'Sure To Pay',
   inputAmount: 'Please Input Amount',
   inputPassword: 'Please Input Password',
+  myWallet: 'My Wallet',
+  transferIn: 'Transfer In',
+  transferOut: 'Transfer Out',
+  transferRecord: 'Transfer Record',
+  searchCoin: 'Search Coin',
+  hideUnfamousCoin: 'Hide Unfamous Coin',
 };
