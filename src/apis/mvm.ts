@@ -32,15 +32,17 @@ export default {
     asset: string
     amount: string
     to: string
+    uuid?: string
   }) {
     return `${BASE}/coins/transfer?${qs.stringify(p)}`;
   },
 
   transactions(p: {
     asset?: string
-    account: string
+    account?: string
     count?: number
     sort?: string
+    timestamp?: string
   }) {
     return request(`${BASE}/coins/transactions?${qs.stringify(p)}`) as Promise<ITransactionRes>;
   },
