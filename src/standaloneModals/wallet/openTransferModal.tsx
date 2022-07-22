@@ -25,6 +25,7 @@ import getKeyName from 'utils/getKeyName';
 import inputFinanceAmount from 'utils/inputFinanceAmount';
 import openDepositModal from './openDepositModal';
 import sleep from 'utils/sleep';
+import { pubkeyToAddr as pub2 } from 'utils/pubkeyToAddr';
 
 export default async (props: { name: string, avatar: string, pubkey: string, uuid?: string }) => new Promise<void>((rs) => {
   const div = document.createElement('div');
@@ -107,7 +108,15 @@ const RumPayment = observer((props: any) => {
 
   React.useEffect(() => {
     (async () => {
+      console.log(pubkey);
       const res = await pubkeyToAddr.get(pubkey);
+      console.log(res);
+      console.log(pub2(pubkey));
+      console.log(activeGroup.user_pubkey);
+      console.log(activeGroup.user_eth_addr);
+      const res2 = await pubkeyToAddr.get(activeGroup.user_pubkey);
+      console.log(res2);
+      console.log(pub2(activeGroup.user_pubkey));
       if (res && res.addr) {
         state.recipient = res.addr;
       }
