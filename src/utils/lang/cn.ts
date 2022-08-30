@@ -123,6 +123,7 @@ export const content = {
   require: (name: string) => `请输入${name}`,
   requireMaxLength: (name: string, length: number) => `${name}不能超过${length}个字哦`,
   notFound: (name: string) => `${name}不存在`,
+  notFound2: (name: string) => `${name}不存在或尚未被同步`,
   groupName: '种子网络名称',
   desc: '简介',
   groupDesc: '种子网络简介',
@@ -531,6 +532,8 @@ export const content = {
   someWalletNoEmpty: '有群组的钱包余额不为零!',
   insufficientRum: '本次操作提供的 RUM 不足以出块',
   exchange: '兑换',
+  custom: '自定义',
+  share2: '转',
 };
 
 export type Content = typeof content;
