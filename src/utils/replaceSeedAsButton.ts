@@ -38,17 +38,24 @@ export const replaceSeedAsButton = (box: HTMLElement) => {
   );
   BFSReplace(
     box,
-    /(rum:\/\/seed.*)/g,
+    /(rum:\/\/seed[^\s]*)/g,
     (text: string) => {
       try {
         const seed = QuorumLightNodeSDK.utils.restoreSeedFromUrl(text);
         if (seed) {
           const div = document.createElement('div');
-          const img = document.createElement('img');
-          img.className = 'inline w-[14px]';
-          img.src = SeedIcon;
-          img.style.margin = '0 5px 2px 0';
-          div.append(img);
+          const hasobject = /&o=([a-za-z0-9-]*)/.test(text);
+          if (hasobject) {
+            const span = document.createElement('span');
+            span.textContent = '@';
+            div.append(span);
+          } else {
+            const img = document.createElement('img');
+            img.className = 'inline w-[14px]';
+            img.src = SeedIcon;
+            img.style.margin = '0 5px 2px 0';
+            div.append(img);
+          }
           div.style.verticalAlign = '6%';
           div.style.maxWidth = 'max-content';
           div.dataset.seed = text;

@@ -24,7 +24,7 @@ import getKeyName from 'utils/getKeyName';
 import inputFinanceAmount from 'utils/inputFinanceAmount';
 import openDepositModal from './openDepositModal';
 import sleep from 'utils/sleep';
-import { pubkeyToAddr } from 'utils/pubkeyToAddr';
+import QuorumLightNodeSDK from 'quorum-light-node-sdk';
 
 export default async (props: { name: string, avatar: string, pubkey: string, uuid?: string }) => new Promise<void>((rs) => {
   const div = document.createElement('div');
@@ -106,7 +106,7 @@ const RumPayment = observer((props: any) => {
 
   React.useEffect(() => {
     try {
-      state.recipient = pubkeyToAddr(pubkey);
+      state.recipient = QuorumLightNodeSDK.utils.pubkeyToAddress(pubkey);
     } catch {
       snackbarStore.show({
         message: lang.wrongPubkey,
@@ -121,9 +121,9 @@ const RumPayment = observer((props: any) => {
           state.transfersCount = new Set<string>(transfers.map((transfer) => transfer.from)).size;
           transfers.forEach((transfer) => {
             if (state.TransferMap[transfer.asset.rumSymbol]) {
-              state.TransferMap[transfer.asset.rumSymbol] = formatAmount(String(+state.TransferMap[transfer.asset.rumSymbol] + +transfer.amount));
+              state.TransferMap[transfer.asset.rumSymbol] = formatAmount(String(+state.TransferMap[transfer.asset.rumSymbol] + +transfer.value));
             } else {
-              state.TransferMap[transfer.asset.rumSymbol] = formatAmount(transfer.amount);
+              state.TransferMap[transfer.asset.rumSymbol] = formatAmount(transfer.value);
             }
           });
         }
