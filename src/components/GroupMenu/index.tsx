@@ -11,7 +11,7 @@ import useActiveGroup from 'store/selectors/useActiveGroup';
 import { groupInfo } from 'standaloneModals/groupInfo';
 import { manageGroup } from 'standaloneModals/manageGroup';
 import { lang } from 'utils/lang';
-import { useLeaveGroup, useCheckWallet } from 'hooks/useLeaveGroup';
+import { useLeaveGroup } from 'hooks/useLeaveGroup';
 import IconSeednetManage from 'assets/icon_seednet_manage.svg';
 import MutedListModal from './MutedListModal';
 import useActiveGroupMutedPublishers from 'store/selectors/useActiveGroupMutedPublishers';
@@ -30,7 +30,6 @@ export default observer(() => {
 
   const isGroupOwner = useIsCurrentGroupOwner();
   const activeGroup = useActiveGroup();
-  const checkWallet = useCheckWallet();
   const leaveGroup = useLeaveGroup();
   const activeGroupMutedPublishers = useActiveGroupMutedPublishers();
   const latestStatus = latestStatusStore.map[activeGroupStore.id] || latestStatusStore.DEFAULT_LATEST_STATUS;
@@ -71,12 +70,8 @@ export default observer(() => {
     state.showAuthListModal = true;
   };
 
-  const handleLeaveGroup = async () => {
+  const handleLeaveGroup = () => {
     let confirmText = '';
-    const valid = await checkWallet(activeGroup);
-    if (!valid) {
-      confirmText += `<span class="text-red-400 font-bold">${lang.walletNoEmpty}</span><br/>`;
-    }
     if (latestStatus.producerCount === 1 && isGroupOwner) {
       confirmText = lang.singleProducerConfirm;
     }
@@ -93,10 +88,10 @@ export default observer(() => {
           return;
         }
         confirmDialogStore.setLoading(true);
+        await leaveGroup(activeGroup.group_id);
         if (checked) {
           await GroupApi.clearGroup(activeGroup.group_id);
         }
-        await leaveGroup(activeGroup.group_id);
         confirmDialogStore.hide();
       },
     });

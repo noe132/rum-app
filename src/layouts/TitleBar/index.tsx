@@ -36,6 +36,7 @@ interface MenuItem {
 export const TitleBar = observer((props: Props) => {
   const { modalStore, nodeStore } = useStore();
   const cleanLocalData = useCleanLocalData();
+  const isLogin = !!nodeStore.storagePath;
 
   const menuLeft: Array<MenuItem> = [
     !!process.env.IS_ELECTRON && {
@@ -52,6 +53,7 @@ export const TitleBar = observer((props: Props) => {
           action: () => {
             openBetaFeaturesModal();
           },
+          hidden: !isLogin,
         },
         {
           text: lang.exit,
@@ -93,12 +95,14 @@ export const TitleBar = observer((props: Props) => {
             }
             getCurrentWindow().webContents.send('export-logs');
           },
+          hidden: !isLogin,
         },
         {
           text: lang.clearCache,
           action: () => {
             cleanLocalData();
           },
+          hidden: !isLogin,
         },
         {
           text: lang.relaunch,
@@ -115,10 +119,11 @@ export const TitleBar = observer((props: Props) => {
         {
           text: lang.manual,
           action: () => {
+            const url = i18n.state.lang === 'cn' ? 'https://guide.rumsystem.net/' : 'https://guide-en.rumsystem.net/';
             if (process.env.IS_ELECTRON) {
-              shell.openExternal('https://docs.prsdev.club/#/rum-app/');
+              shell.openExternal(url);
             } else {
-              window.open('https://docs.prsdev.club/#/rum-app/');
+              window.open(url);
             }
           },
         },
